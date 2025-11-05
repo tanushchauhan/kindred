@@ -82,7 +82,11 @@ export default function CompleteProfilePage() {
 
   const checkUsernameAvailability = async (username: string) => {
     if (!username || username.length < 3) {
-      setUsernameAvailable(null);
+      if (username.length > 0 && username.length < 3) {
+        setUsernameAvailable(false);
+      } else {
+        setUsernameAvailable(null);
+      }
       return;
     }
 
@@ -276,11 +280,19 @@ export default function CompleteProfilePage() {
                     Checking availability...
                   </p>
                 )}
-                {usernameAvailable === false && (
-                  <p className="mt-1 text-sm text-red-600 font-medium">
-                    ✗ Username is already taken or invalid format
-                  </p>
-                )}
+                {usernameAvailable === false &&
+                  formData.userName.length > 0 &&
+                  formData.userName.length < 3 && (
+                    <p className="mt-1 text-sm text-red-600 font-medium">
+                      ✗ Username is too short (minimum 3 characters)
+                    </p>
+                  )}
+                {usernameAvailable === false &&
+                  formData.userName.length >= 3 && (
+                    <p className="mt-1 text-sm text-red-600 font-medium">
+                      ✗ Username is already taken or invalid format
+                    </p>
+                  )}
                 {usernameAvailable === true && (
                   <p className="mt-1 text-sm text-green-600 font-medium">
                     ✓ Username is available!

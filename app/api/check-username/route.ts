@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * GET /api/check-username
@@ -23,16 +23,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ available: false });
     }
 
-    const supabase = await createServerSupabaseClient();
+    // Use service role client to bypass RLS for username checking
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Check if username exists
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("users")
-      .select("id")
+      .select("user_name")
       .eq("user_name", username)
-      .single();
+      .limit(1);
 
-    return NextResponse.json({ available: !data });
+    // If there's an error, return server error
+    if (error) {
+      console.error("Error checking username:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
+
+    // If data array has any items, username is taken; otherwise it's available
+    return NextResponse.json({ available: data.length === 0 });
   } catch (error) {
     console.error("Error checking username:", error);
     return NextResponse.json(
