@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Wellness Platform",
-  description: "Connect with verified nutritionists and personal trainers",
+  title: "Kindred",
+  description: "A place to find your wellness family",
 };
 
 export default function RootLayout({

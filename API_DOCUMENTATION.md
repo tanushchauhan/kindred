@@ -1,6 +1,6 @@
 # API Routes Documentation
 
-Complete API reference for the wellness platform using Next.js App Router and Supabase.
+Complete API reference for Kindred using Next.js App Router and Supabase.
 
 ## Authentication
 

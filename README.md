@@ -1,3 +1,29 @@
+# Kindred
+
+**A place to find your wellness family**
+
+A comprehensive wellness platform built with Next.js and Supabase, connecting clients with verified trainers and nutritionists.
+
+## Features
+
+- 🔐 **User Authentication** - Secure signup/signin with email confirmation
+- 👤 **User Profiles** - Complete profile management for all user types
+- 🏋️ **Professional Directory** - Browse verified trainers and nutritionists
+- 👨‍⚕️ **Professional Onboarding** - Trainers and nutritionists can showcase their expertise
+- 🔍 **Username System** - Unique usernames with real-time availability checking
+- 📊 **Role-Based Access** - Different experiences for clients, trainers, and nutritionists
+- ✅ **Verification System** - Admin verification for professionals
+
+## Tech Stack
+
+- **Framework:** Next.js 16 with App Router
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth
+- **Styling:** Tailwind CSS
+- **Language:** TypeScript
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

@@ -5,11 +5,9 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 px-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Wellness Platform
-          </h1>
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">Kindred</h1>
           <p className="text-xl text-gray-600">
-            Your journey to better health starts here
+            A place to find your wellness family
           </p>
         </div>
 
