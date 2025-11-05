@@ -1,21 +1,18 @@
 # API Routes Documentation
 
-Core user authentication and onboarding API routes for the wellness platform using Next.js App Router and Supabase.
+Complete API reference for the wellness platform using Next.js App Router and Supabase.
 
 ## Authentication
 
-Protected routes (`/api/me/*`) use server-side session validation via cookies.
+Protected routes use server-side session validation via cookies. Include credentials in all authenticated requests.
 
-## Endpoints
+---
+
+## Authentication Endpoints
 
 ### POST /api/auth/signup
 
-Registers a new user in Supabase Auth. Creates auth account only.
-
-**Important:** After signup, users must:
-
-1. Confirm their email via the link sent to them
-2. Call `POST /api/auth/complete-profile` with their profile data to create database records
+Register a new user. Email confirmation required.
 
 **Request:**
 
@@ -26,44 +23,129 @@ Registers a new user in Supabase Auth. Creates auth account only.
 }
 ```
 
-**Required Fields:** `email`, `password`
-
 **Success (201):**
 
 ```json
 {
   "user": { "id": "uuid", "email": "user@example.com" },
-  "message": "Please check your email to confirm your account. After confirmation, complete your profile at /api/auth/complete-profile",
+  "message": "Check your email to confirm account",
   "emailConfirmationRequired": true
 }
 ```
 
-**Errors:** 400 (validation), 500 (server error)
+**Errors:** 400, 500
 
 ---
 
-### POST /api/auth/complete-profile
+### POST /api/auth/login
 
-Completes user profile after email confirmation. Creates records in database tables.
-
-**Auth Required:** Yes (must be logged in after email confirmation)
+Authenticate a user.
 
 **Request:**
 
 ```json
 {
-  "role": "client",
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Success (200):**
+
+```json
+{
+  "session": { "access_token": "...", "refresh_token": "..." },
+  "user": { "id": "uuid", "email": "user@example.com" },
+  "message": "Login successful"
+}
+```
+
+**Errors:** 400, 401, 500
+
+---
+
+### POST /api/auth/logout
+
+Sign out the current user.
+
+**Auth Required:** Yes
+
+**Success (200):**
+
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+---
+
+### GET /api/auth/user
+
+Get authenticated user's email.
+
+**Auth Required:** Yes
+
+**Success (200):**
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Errors:** 401
+
+---
+
+### DELETE /api/auth/delete-account
+
+Permanently delete user account and all data.
+
+**Auth Required:** Yes
+
+**Success (200):**
+
+```json
+{
+  "message": "Account deleted successfully"
+}
+```
+
+**Errors:** 401, 500
+
+---
+
+## Profile Management
+
+### POST /api/auth/complete-profile
+
+Complete user profile after email confirmation. Creates database records.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "role": "client | trainer | nutritionist",
   "fullName": "John Doe",
+  "userName": "johndoe",
   "phoneNumber": "+1234567890",
-  "gender": "male",
+  "gender": "male | female | other",
   "location": "New York, NY",
   "birthDate": "1990-01-15"
 }
 ```
 
-**Required Fields:** `role`, `fullName`
+**Required:** `role`, `fullName`, `userName`
 
-**Optional Fields:** `phoneNumber`, `gender`, `location`, `birthDate`
+**Username Requirements:**
+
+- Unique
+- Minimum 3 characters
+- Only letters, numbers, hyphens, underscores
+- Format: `/^[a-zA-Z0-9_-]+$/`
 
 **Success (200):**
 
@@ -72,75 +154,57 @@ Completes user profile after email confirmation. Creates records in database tab
   "message": "Profile completed successfully",
   "user": {
     "id": "uuid",
-    "email": "user@example.com",
     "role": "client",
-    "full_name": "John Doe"
+    "full_name": "John Doe",
+    "user_name": "johndoe"
   }
 }
 ```
 
-**Errors:** 400 (already completed / missing data), 401 (unauthorized), 500 (server error)
+**Errors:** 400 (username taken/invalid), 401, 500
 
 ---
 
 ### GET /api/auth/complete-profile
 
-Checks if the authenticated user needs to complete their profile.
+Check if profile needs completion.
 
 **Auth Required:** Yes
-
-**Success (200) - Profile Completed:**
-
-```json
-{
-  "profileCompleted": true,
-  "user": { "id": "uuid", "role": "client", "full_name": "John Doe" }
-}
-```
-
-**Success (200) - Profile Incomplete:**
-
-```json
-{
-  "profileCompleted": false,
-  "message": "Please complete your profile by calling POST /api/auth/complete-profile with role and fullName"
-}
-```
-
-**Errors:** 401 (unauthorized), 500 (server error)
-
----
-
-### POST /api/auth/login
-
-Authenticates a user.
-
-**Request:**
-
-```json
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
-```
 
 **Success (200):**
 
 ```json
 {
-  "session": { "access_token": "jwt_token", "refresh_token": "..." },
-  "user": { "id": "uuid", "email": "user@example.com" },
-  "message": "Login successful"
+  "profileCompleted": true | false,
+  "user": { ... } // if completed
 }
 ```
 
-**Errors:** 400 (validation), 401 (invalid credentials), 500 (server error)
+**Errors:** 401, 500
+
+---
+
+### GET /api/check-username
+
+Check username availability in real-time.
+
+**Query Params:** `username`
+
+**Success (200):**
+
+```json
+{
+  "available": true | false
+}
+```
+
+**Errors:** 400
 
 ---
 
 ### GET /api/me
 
-Fetches the authenticated user's complete profile with role-specific data.
+Get complete user profile with role-specific data.
 
 **Auth Required:** Yes
 
@@ -149,23 +213,60 @@ Fetches the authenticated user's complete profile with role-specific data.
 ```json
 {
   "id": "uuid",
+  "email": "user@example.com",
+  "user_name": "johndoe",
   "role": "client",
   "full_name": "John Doe",
   "phone_number": "+1234567890",
   "gender": "male",
   "location": "New York, NY",
   "birth_date": "1990-01-15",
-  "client_profiles": [{ "user_id": "uuid", "onboarding_data": {...} }]
+  "client_profiles": [...] // or trainer_profiles/nutritionist_profiles
 }
 ```
 
-**Errors:** 401 (unauthorized), 404 (not found), 500 (server error)
+**Errors:** 401, 404 (profile incomplete - redirect to complete-profile), 500
 
 ---
 
+### PUT /api/profile/update
+
+Update user profile information. Available to all roles.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "full_name": "John Doe",
+  "phone_number": "+1234567890",
+  "gender": "male | female | other",
+  "location": "New York, NY",
+  "birth_date": "1990-01-15"
+}
+```
+
+**Required:** `full_name`
+
+**Success (200):**
+
+```json
+{
+  "message": "Profile updated successfully",
+  "profile": { ... }
+}
+```
+
+**Errors:** 400, 401, 500
+
+---
+
+## Client Onboarding
+
 ### POST /api/me/onboarding
 
-Saves onboarding questionnaire data for clients only.
+Save onboarding questionnaire data (clients only).
 
 **Auth Required:** Yes (clients only)
 
@@ -184,95 +285,157 @@ Saves onboarding questionnaire data for clients only.
 ```json
 {
   "message": "Onboarding data saved successfully",
-  "data": { "goals": ["weight_loss"], ... }
+  "data": { ... }
 }
 ```
 
-**Errors:** 400 (validation), 401 (unauthorized), 403 (not a client), 500 (server error)
+**Errors:** 400, 401, 403, 500
 
 ---
 
-## Environment Variables
+## Professional Features
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+### GET /api/professionals/onboarding
+
+Get professional's onboarding status and profile.
+
+**Auth Required:** Yes (trainers/nutritionists only)
+
+**Success (200):**
+
+```json
+{
+  "role": "trainer",
+  "profile": {
+    "bio": "Experienced trainer...",
+    "specialties": ["Weight Loss", "HIIT"],
+    "is_verified": true
+  },
+  "isVerified": true,
+  "hasCompletedOnboarding": true
+}
 ```
+
+**Errors:** 401, 403, 404
+
+---
+
+### PUT /api/professionals/onboarding
+
+Update professional profile with bio and specialties.
+
+**Auth Required:** Yes (verified trainers/nutritionists only)
+
+**Request:**
+
+```json
+{
+  "bio": "Experienced trainer specializing in...",
+  "specialties": ["Weight Loss", "Strength Training", "Custom Specialty"]
+}
+```
+
+**Required:** `bio` (non-empty), at least one specialty
+
+**Success (200):**
+
+```json
+{
+  "message": "Professional onboarding completed successfully",
+  "profile": { ... }
+}
+```
+
+**Errors:** 400, 401, 403 (not verified), 404, 500
+
+---
+
+## Public Professional Directory
+
+### GET /api/professionals
+
+List all verified trainers and nutritionists with complete profiles.
+
+**Auth Required:** No (public)
+
+**Success (200):**
+
+```json
+{
+  "trainers": [
+    {
+      "id": "uuid",
+      "full_name": "John Doe",
+      "user_name": "johndoe",
+      "location": "Austin, TX",
+      "trainer_profiles": {
+        "bio": "Experienced trainer...",
+        "specialties": ["Weight Loss", "HIIT"],
+        "is_verified": true
+      }
+    }
+  ],
+  "nutritionists": [...]
+}
+```
+
+**Filters:** Only verified professionals with bio and username set.
+
+**Errors:** 500
+
+---
+
+### GET /api/professionals/[username]
+
+Get individual professional profile by username.
+
+**Auth Required:** No (public)
+
+**Success (200):**
+
+```json
+{
+  "id": "uuid",
+  "role": "trainer",
+  "full_name": "John Doe",
+  "user_name": "johndoe",
+  "location": "Austin, TX",
+  "profile": {
+    "bio": "Experienced trainer...",
+    "specialties": ["Weight Loss", "HIIT"],
+    "is_verified": true
+  }
+}
+```
+
+**Errors:** 404 (not found/not verified/incomplete profile), 500
+
+---
 
 ## Complete Registration Flow
 
-The registration process requires two steps due to email confirmation:
-
-### Step 1: Signup
-
-User submits registration form with email and password only.
+### 1. Signup
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/signup \
   -H "Content-Type: application/json" \
-  -d '{
-    "email":"user@example.com",
-    "password":"securePass123"
-  }'
+  -d '{"email":"user@example.com","password":"pass123"}'
 ```
 
-    "role":"client",
+### 2. Confirm Email
 
-````
+Click link in email (Supabase handles this).
 
-**Response:**
-
-```json
-{
-  "user": { "id": "uuid", "email": "user@example.com" },
-  "message": "Please check your email to confirm your account...",
-  "emailConfirmationRequired": true
-}
-````
-
-### Step 2: Email Confirmation
-
-User clicks confirmation link in email (handled by Supabase automatically).
-
-### Step 3: Login
-
-After confirmation, user logs in. **Important: Save cookies for authentication!**
+### 3. Login (Save Cookies)
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -c cookies.txt \
-  -d '{
-    "email":"user@example.com",
-    "password":"securePass123"
-  }'
+  -d '{"email":"user@example.com","password":"pass123"}'
 ```
 
-**Note:** The `-c cookies.txt` flag saves session cookies to a file for subsequent requests.
-
-### Step 4: Check Profile Status
-
-Check if profile needs completion. **Use saved cookies:**
-
-```bash
-curl -X GET http://localhost:3000/api/auth/complete-profile \
-  -b cookies.txt
-```
-
-**Note:** The `-b cookies.txt` flag sends the saved session cookies for authentication.
-
-**If incomplete:**
-
-```json
-{
-  "profileCompleted": false,
-  "message": "Please complete your profile by calling POST /api/auth/complete-profile with role and fullName"
-}
-```
-
-### Step 5: Complete Profile
-
-Create database records with profile data. **Must include cookies:**
+### 4. Complete Profile
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/complete-profile \
@@ -281,93 +444,47 @@ curl -X POST http://localhost:3000/api/auth/complete-profile \
   -d '{
     "role":"client",
     "fullName":"John Doe",
-    "phoneNumber":"+1234567890",
-    "gender":"male",
-    "location":"New York, NY",
-    "birthDate":"1990-01-15"
+    "userName":"johndoe",
+    "location":"New York, NY"
   }'
 ```
 
-**Note:** The `-b cookies.txt` flag is required to send authentication cookies.
-
-**Success:**
-
-```json
-{
-  "message": "Profile completed successfully",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "role": "client",
-    "full_name": "John Doe"
-  }
-}
-```
-
-### Step 6: Access Profile
-
-Now user can access protected endpoints:
+### 5. Access Protected Routes
 
 ```bash
-curl -X GET http://localhost:3000/api/me \
-  -b cookies.txt
+curl -X GET http://localhost:3000/api/me -b cookies.txt
 ```
 
 ---
 
-## Testing Examples
+## Professional Specialties
 
-**Quick Test (with email confirmation disabled):**
+### Trainer Specialties (22)
 
-```bash
-# 1. Signup
-curl -X POST http://localhost:3000/api/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"pass123","role":"client","fullName":"Test User"}'
+Weight Loss, Muscle Building, Strength Training, Cardiovascular Training, HIIT, CrossFit, Powerlifting, Olympic Weightlifting, Bodybuilding, Functional Training, Sports-Specific Training, Injury Rehabilitation, Pre/Postnatal Fitness, Senior Fitness, Youth Fitness, Flexibility & Mobility, Yoga, Pilates, Boxing & Martial Arts, Running & Marathon Training, Calisthenics, TRX/Suspension Training
 
-# 2. Login (saves cookies)
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{"email":"test@example.com","password":"pass123"}'
+### Nutritionist Specialties (22)
 
-# 3. Complete profile
-curl -X POST http://localhost:3000/api/auth/complete-profile \
-  -b cookies.txt
+Weight Management, Sports Nutrition, Clinical Nutrition, Pediatric Nutrition, Geriatric Nutrition, Prenatal/Postnatal Nutrition, Diabetes Management, Heart Health, Digestive Health, Food Allergies & Intolerances, Plant-Based/Vegan Nutrition, Ketogenic Diet, Mediterranean Diet, Eating Disorders, Autoimmune Conditions, Hormone Balance, Mental Health & Nutrition, Meal Planning, Supplement Guidance, Metabolic Health, Renal Nutrition, Oncology Nutrition
 
-# 4. Get profile
-curl -X GET http://localhost:3000/api/me \
-  -b cookies.txt
-
-# 5. Save onboarding data
-curl -X POST http://localhost:3000/api/me/onboarding \
-  -H "Content-Type: application/json" \
-  -b cookies.txt \
-  -d '{"goals":["weight_loss"],"fitness_level":"beginner"}'
-```
-
-**Note:** To disable email confirmation for testing:
-
-- Go to Supabase Dashboard → Authentication → Email Auth
-- Uncheck "Enable email confirmations"
-- Re-enable in production!
+Custom specialties are also supported.
 
 ---
 
 ## Error Handling
 
-All endpoints follow consistent error response format:
+All endpoints return consistent error format:
 
 ```json
 {
-  "error": "Error message description"
+  "error": "Error message"
 }
 ```
 
-Common HTTP status codes:
+**Common Status Codes:**
 
 - `200` - Success
-- `201` - Created (signup)
+- `201` - Created
 - `400` - Bad Request (validation error)
 - `401` - Unauthorized (not logged in)
 - `403` - Forbidden (insufficient permissions)
@@ -376,89 +493,58 @@ Common HTTP status codes:
 
 ---
 
-## Troubleshooting
+## Key Features
 
-### "User profile not found" (404) on GET /api/me
+### Username System
 
-**Cause:** User exists in auth but not in database tables.
+- Required during profile completion
+- Unique constraint enforced
+- Real-time availability checking
+- Used for professional profile URLs (`/professionals/username`)
 
-**Solution:** Call `POST /api/auth/complete-profile` to create database records.
+### Professional Visibility
 
-### "Unauthorized" (401) on /api/auth/complete-profile
+Shows in directory only if:
 
-**Cause:** User hasn't confirmed email, isn't logged in, or **cookies weren't passed**.
+- `is_verified = true`
+- Bio is not null
+- Username is set
+- Profile complete
 
-**Solution:**
+### Auto-Redirects
 
-1. Check email for confirmation link
-2. Click confirmation link
-3. Login via `POST /api/auth/login` **with `-c cookies.txt`** to save cookies
-4. Retry profile completion **with `-b cookies.txt`** to send cookies
-
-**Common mistake:** Forgetting to use `-c` on login or `-b` on subsequent requests.
-
-**Example of correct flow:**
-
-```bash
-# Login and SAVE cookies
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{"email":"user@example.com","password":"pass123"}'
-
-# Complete profile and SEND cookies
-curl -X POST http://localhost:3000/api/auth/complete-profile \
-  -H "Content-Type: application/json" \
-  -b cookies.txt \
-  -d '{"role":"client","fullName":"John Doe"}'
-```
-
-### "Profile already completed" (400) on POST /api/auth/complete-profile
-
-**Cause:** Database records already exist for this user.
-
-**Solution:** This is expected. User can proceed to use the app normally.
-
-### Email confirmation not received
-
-**Solutions:**
-
-1. Check spam folder
-2. Wait a few minutes (email delivery can be delayed)
-3. For development: Disable email confirmation in Supabase Dashboard
-4. Check Supabase logs for email delivery errors
-
-### RLS policy errors (42501)
-
-**Cause:** Missing INSERT policies on database tables.
-
-**Solution:** Run the INSERT policies from `DATABASE_INSERT_POLICIES.sql`:
-
-```sql
--- Allow users to insert their own records
-CREATE POLICY "Users can insert own record"
-ON users FOR INSERT
-WITH CHECK (auth.uid() = id);
-
-CREATE POLICY "Users can insert own client profile"
-ON client_profiles FOR INSERT
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own trainer profile"
-ON trainer_profiles FOR INSERT
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own nutritionist profile"
-ON nutritionist_profiles FOR INSERT
-WITH CHECK (auth.uid() = user_id);
-```
+- Dashboard checks profile completion → redirects to complete-profile if needed
+- Complete-profile checks authentication → redirects if already done
+- Sign-in/Sign-up pages redirect authenticated users to dashboard
 
 ---
 
-## Additional Resources
+## Environment Variables
 
-- **REGISTRATION_FLOW.md** - Detailed registration flow explanation
-- **DATABASE_INSERT_POLICIES.sql** - RLS policies for database
-- **FIX_TEST_USER.sql** - Manual user profile creation script
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
 
-For more details on the two-step registration approach, see `REGISTRATION_FLOW.md`.
+**Note:**
+
+- `NEXT_PUBLIC_*` variables are exposed to the browser
+- `SUPABASE_SERVICE_ROLE_KEY` is server-side only (never expose to client)
+- Service role key bypasses RLS policies (use with caution)
+
+---
+
+## Database Requirements
+
+### Users Table
+
+Must have `user_name` column with UNIQUE constraint:
+
+```sql
+ALTER TABLE users ADD COLUMN user_name text UNIQUE;
+```
+
+### Professional Verification
+
+Set `is_verified = true` in `trainer_profiles` or `nutritionist_profiles` table to allow onboarding.
