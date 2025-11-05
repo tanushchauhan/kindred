@@ -1,90 +1,84 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { SignUpRequest, AuthResponse } from "@/lib/types";
+import { NextResponse } from "next/server";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
-export async function POST(request: NextRequest) {
+/**
+ * POST /api/auth/signup
+ * Registers a new user and creates their profile records
+ */
+export async function POST(request: Request) {
   try {
-    const body: SignUpRequest = await request.json();
-    const { email, password, name } = body;
+    // Create server-side Supabase client
+    const supabase = await createServerSupabaseClient();
 
-    // Validate input
-    if (!email || !password || !name) {
-      return NextResponse.json<AuthResponse>(
+    // Parse the request body
+    const body = await request.json();
+    const { email, password } = body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return NextResponse.json(
         {
-          success: false,
-          error: "Email, password, and name are required",
+          error: "Missing required fields: email and password are required",
         },
         { status: 400 }
       );
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate password length
     if (password.length < 6) {
-      return NextResponse.json<AuthResponse>(
-        {
-          success: false,
-          error: "Password must be at least 6 characters",
-        },
+      return NextResponse.json(
+        { error: "Password must be at least 6 characters long" },
         { status: 400 }
       );
     }
 
-    // Sign up with Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
+    // Sign up the user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          name: name,
-        },
-      },
     });
 
-    if (error) {
-      return NextResponse.json<AuthResponse>(
-        {
-          success: false,
-          error: error.message,
-        },
-        { status: 400 }
-      );
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
-    if (!data.user) {
-      return NextResponse.json<AuthResponse>(
-        {
-          success: false,
-          error: "Failed to create user",
-        },
+    if (!authData.user) {
+      return NextResponse.json(
+        { error: "User creation failed" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json<AuthResponse>(
+    // Check if email confirmation is required
+    const emailConfirmationRequired = !authData.session;
+
+    // Return success response
+    return NextResponse.json(
       {
-        success: true,
-        message:
-          "Account created successfully! Please check your email to verify your account.",
         user: {
-          id: data.user.id,
-          email: data.user.email!,
-          name: data.user.user_metadata?.name,
+          id: authData.user.id,
+          email: authData.user.email,
         },
-        session: data.session
-          ? {
-              access_token: data.session.access_token,
-              refresh_token: data.session.refresh_token,
-            }
-          : undefined,
+        message: emailConfirmationRequired
+          ? "Please check your email to confirm your account. After confirmation, complete your profile at /api/auth/complete-profile"
+          : "User created successfully. Please complete your profile at /api/auth/complete-profile",
+        emailConfirmationRequired,
       },
       { status: 201 }
     );
   } catch (error) {
     console.error("Signup error:", error);
-    return NextResponse.json<AuthResponse>(
-      {
-        success: false,
-        error: "An unexpected error occurred",
-      },
+    return NextResponse.json(
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
