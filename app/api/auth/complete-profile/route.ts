@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       gender,
       location,
       birthDate,
+      reasonForJoining,
     } = body;
 
     // Validate required fields
@@ -57,6 +58,17 @@ export async function POST(request: Request) {
         {
           error:
             "Missing required fields: role, fullName, and userName are required",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate reasonForJoining for professionals
+    if ((role === "trainer" || role === "nutritionist") && !reasonForJoining) {
+      return NextResponse.json(
+        {
+          error:
+            "Reason for joining is required for trainers and nutritionists",
         },
         { status: 400 }
       );
@@ -135,6 +147,7 @@ export async function POST(request: Request) {
         bio: null,
         specialties: [],
         is_verified: false,
+        reason_for_joining: reasonForJoining || null,
       });
       profileInsertError = error;
     } else if (role === "nutritionist") {
@@ -143,6 +156,7 @@ export async function POST(request: Request) {
         bio: null,
         specialties: [],
         is_verified: false,
+        reason_for_joining: reasonForJoining || null,
       });
       profileInsertError = error;
     }

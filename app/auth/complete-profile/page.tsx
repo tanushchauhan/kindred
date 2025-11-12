@@ -22,6 +22,7 @@ export default function CompleteProfilePage() {
     gender: "",
     location: "",
     birthDate: "",
+    reasonForJoining: "",
   });
 
   // Check if user is authenticated and if profile is already complete
@@ -57,7 +58,9 @@ export default function CompleteProfilePage() {
   }, [router]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -378,6 +381,36 @@ export default function CompleteProfilePage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+
+              {/* Professional Reason for Joining - Only show for trainers and nutritionists */}
+              {(formData.role === "trainer" ||
+                formData.role === "nutritionist") && (
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="reasonForJoining"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Why do you want to join as a{" "}
+                    {formData.role === "trainer" ? "Trainer" : "Nutritionist"}?{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="reasonForJoining"
+                    name="reasonForJoining"
+                    required
+                    rows={6}
+                    value={formData.reasonForJoining}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    placeholder="Please provide details about your qualifications, certifications, experience, and why you want to join our platform as a professional. This information will be reviewed by our admin team for approval."
+                  />
+                  <p className="mt-2 text-sm text-gray-600">
+                    Include your qualifications, certifications, years of
+                    experience, and specializations. This will be reviewed by
+                    our admin team.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="pt-4">

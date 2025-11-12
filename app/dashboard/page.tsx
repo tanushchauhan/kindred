@@ -14,10 +14,15 @@ interface UserProfile {
   gender: string | null;
   location: string | null;
   birth_date: string | null;
-  client_profiles?: Array<{
-    user_id: string;
-    onboarding_data: Record<string, unknown> | null;
-  }>;
+  client_profiles?:
+    | Array<{
+        user_id: string;
+        onboarding_data: Record<string, unknown> | null;
+      }>
+    | {
+        user_id: string;
+        onboarding_data: Record<string, unknown> | null;
+      };
   trainer_profiles?: {
     user_id: string;
     bio: string | null;
@@ -36,6 +41,30 @@ export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Helper function to check if onboarding is completed
+  const hasCompletedOnboarding = (
+    clientProfiles?:
+      | Array<{
+          user_id: string;
+          onboarding_data: Record<string, unknown> | null;
+        }>
+      | {
+          user_id: string;
+          onboarding_data: Record<string, unknown> | null;
+        }
+  ): boolean => {
+    if (!clientProfiles) return false;
+
+    // Normalize to single object
+    const clientProfile = Array.isArray(clientProfiles)
+      ? clientProfiles[0]
+      : clientProfiles;
+
+    if (!clientProfile?.onboarding_data) return false;
+
+    return Object.keys(clientProfile.onboarding_data).length > 0;
+  };
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -67,6 +96,12 @@ export default function DashboardPage() {
 
       const data = await response.json();
 
+      // Check if user is admin and redirect
+      if (data.role === "admin") {
+        router.push("/admin");
+        return;
+      }
+
       // Fetch auth user to get email
       const authResponse = await fetch("/api/auth/user", {
         credentials: "include",
@@ -77,8 +112,27 @@ export default function DashboardPage() {
         data.email = authData.email;
       }
 
-      // Debug: Log the profile data to see what we're getting
-      console.log("Profile data:", data);
+      if (data.client_profiles) {
+        console.log("Client profiles:", data.client_profiles);
+        console.log(
+          "Onboarding data:",
+          data.client_profiles[0]?.onboarding_data
+        );
+        console.log(
+          "Type of onboarding_data:",
+          typeof data.client_profiles[0]?.onboarding_data
+        );
+        console.log(
+          "Is onboarding_data null?:",
+          data.client_profiles[0]?.onboarding_data === null
+        );
+        console.log(
+          "Onboarding data keys:",
+          data.client_profiles[0]?.onboarding_data
+            ? Object.keys(data.client_profiles[0].onboarding_data)
+            : "N/A"
+        );
+      }
       if (data.trainer_profiles) {
         console.log("Trainer profiles:", data.trainer_profiles);
       }
@@ -286,18 +340,24 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Client Information
               </h3>
-              {profile.client_profiles[0]?.onboarding_data ? (
+              {hasCompletedOnboarding(profile.client_profiles) ? (
                 <div>
-                  <p className="text-sm text-green-600 mb-3">
-                    ✓ Onboarding completed
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm text-green-600">
+                      ✓ Onboarding completed
+                    </p>
+                    <Link
+                      href="/match"
+                      className="inline-flex items-center px-4 py-2 bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-md hover:from-purple-700 hover:to-blue-700 transition font-medium shadow-md hover:shadow-lg"
+                    >
+                      <span className="mr-2">✨</span>
+                      Find AI Matches
+                    </Link>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Your personalized preferences are set. Use the Quick Actions
+                    below to find matches or update your preferences.
                   </p>
-                  <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto max-h-40">
-                    {JSON.stringify(
-                      profile.client_profiles[0].onboarding_data,
-                      null,
-                      2
-                    )}
-                  </pre>
                 </div>
               ) : (
                 <div>
@@ -473,7 +533,7 @@ export default function DashboardPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
               href="/profile"
               className="border border-gray-300 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition text-center"
@@ -485,7 +545,33 @@ export default function DashboardPage() {
               </p>
             </Link>
 
-            {profile.role === "client" && (
+            {profile.role === "client" &&
+            hasCompletedOnboarding(profile.client_profiles) ? (
+              <>
+                <Link
+                  href="/match"
+                  className="border-2 border-purple-300 bg-linear-to-br from-purple-50 to-blue-50 rounded-lg p-4 hover:border-purple-500 hover:shadow-lg transition text-center"
+                >
+                  <div className="text-2xl mb-2">✨</div>
+                  <h4 className="font-medium text-gray-900">Find AI Matches</h4>
+                  <p className="text-xs text-purple-600 mt-1 font-medium">
+                    Get personalized recommendations
+                  </p>
+                </Link>
+                <Link
+                  href="/onboarding"
+                  className="border border-gray-300 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition text-center"
+                >
+                  <div className="text-2xl mb-2">🔄</div>
+                  <h4 className="font-medium text-gray-900">
+                    Update Preferences
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Change your onboarding data
+                  </p>
+                </Link>
+              </>
+            ) : profile.role === "client" ? (
               <Link
                 href="/onboarding"
                 className="border border-gray-300 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition text-center"
@@ -496,7 +582,7 @@ export default function DashboardPage() {
                   Complete your questionnaire
                 </p>
               </Link>
-            )}
+            ) : null}
 
             {(profile.role === "trainer" ||
               profile.role === "nutritionist") && (

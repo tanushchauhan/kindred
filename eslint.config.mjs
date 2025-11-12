@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore local test scripts folder (not pushed to repo)
+    "test_scripts/**",
   ]),
 ]);
 

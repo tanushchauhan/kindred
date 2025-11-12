@@ -471,6 +471,205 @@ Custom specialties are also supported.
 
 ---
 
+## AI-Powered Matching
+
+### POST /api/admin/generate-embeddings
+
+**[ADMIN ONLY]** Bulk generate embeddings for all professionals. Run once after setup or when adding many professionals.
+
+**Auth Required:** Yes (Admin Secret Key)
+
+**Headers:**
+
+```json
+{
+  "Authorization": "Bearer YOUR_ADMIN_SECRET_KEY"
+}
+```
+
+**Query Params:**
+
+- `type`: `"trainers" | "nutritionists" | "all"` (default: `"all"`)
+
+**Example Request:**
+
+```bash
+curl -X POST 'http://localhost:3000/api/admin/generate-embeddings?type=all' \
+  -H "Authorization: Bearer your_admin_secret_key"
+```
+
+**Success (200):**
+
+```json
+{
+  "message": "Embedding generation complete",
+  "results": {
+    "trainers": {
+      "processed": 15,
+      "success": 15,
+      "failed": 0,
+      "errors": []
+    },
+    "nutritionists": {
+      "processed": 12,
+      "success": 12,
+      "failed": 0,
+      "errors": []
+    }
+  },
+  "timestamp": "2025-11-05T10:30:00.000Z"
+}
+```
+
+**Errors:**
+
+- `401` - Invalid or missing admin key
+- `500` - GEMINI_API_KEY not configured or API error
+
+**Notes:**
+
+- Processes only verified professionals with bios
+- Updates `embedding` column in profile tables
+- Uses Google Gemini embedding-001 model (768 dimensions recommended)
+- Includes 100ms delay between requests to avoid rate limiting
+- Can be safely re-run to update embeddings
+
+---
+
+### GET /api/me/match
+
+**[CLIENTS ONLY]** Get AI-powered matches - the best trainer and nutritionist for your needs.
+
+**Auth Required:** Yes (Client role only)
+
+**Two-Stage Matching Process:**
+
+1. **Semantic Retrieval**: Fast vector similarity search retrieves top 10 candidates per role
+2. **LLM Ranking**: Gemini 2.5 Pro analyzes all candidates and selects the single best match with reasoning
+
+**Success (200):**
+
+```json
+{
+  "matches": {
+    "trainer": {
+      "user_id": "uuid",
+      "full_name": "John Doe",
+      "bio": "Experienced trainer specializing in...",
+      "specialties": ["Weight Loss", "HIIT", "Strength Training"],
+      "reasoning": "John is an excellent match because your goal of losing 30 pounds aligns perfectly with his specialty in weight loss and HIIT training. His experience with beginners will ensure you receive proper guidance."
+    },
+    "nutritionist": {
+      "user_id": "uuid",
+      "full_name": "Jane Smith",
+      "bio": "Registered dietitian with focus on...",
+      "specialties": ["Weight Management", "Plant-Based Nutrition"],
+      "reasoning": "Jane specializes in weight management and plant-based nutrition, which directly aligns with your vegetarian dietary preferences and weight loss goals."
+    }
+  },
+  "metadata": {
+    "query_timestamp": "2025-11-05T10:30:00.000Z",
+    "candidates_retrieved": {
+      "trainers": 10,
+      "nutritionists": 10
+    },
+    "processing_time_ms": 3421
+  }
+}
+```
+
+**Errors:**
+
+- `400` - No onboarding data (complete wellness profile first)
+- `401` - Not authenticated
+- `403` - Not a client (feature only for clients)
+- `404` - No matching professionals found
+- `500` - AI service not configured or API error
+
+**Requirements:**
+
+- Client must have completed onboarding (saved onboarding_data)
+- At least one verified trainer and nutritionist with embeddings
+- GEMINI_API_KEY must be configured
+
+**Performance:**
+
+- Average processing time: 2-4 seconds
+- Vector search: ~100-200ms
+- LLM reasoning: ~2-3 seconds
+- Results are personalized and not cached
+
+---
+
+## AI Matching Setup
+
+### Required Environment Variables
+
+```env
+# Google Gemini API (for embeddings and LLM)
+GEMINI_API_KEY=your_gemini_api_key
+
+# Admin secret for bulk operations
+ADMIN_SECRET_KEY=your_secure_random_string
+```
+
+### Database Configuration
+
+The AI matching feature requires:
+
+1. **pgvector extension** enabled in Supabase
+2. **embedding columns** added to professional profile tables
+3. **Vector similarity search functions** created
+
+See **[INSTRUCTIONS.md](./INSTRUCTIONS.md)** for complete SQL setup.
+
+### First-Time Setup Flow
+
+1. **Configure Database**
+
+```sql
+-- Enable pgvector
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Add embedding columns
+ALTER TABLE trainer_profiles ADD COLUMN embedding vector(768);
+ALTER TABLE nutritionist_profiles ADD COLUMN embedding vector(768);
+
+-- Create search functions
+-- (See INSTRUCTIONS.md for complete SQL)
+```
+
+2. **Set Environment Variables**
+
+```bash
+GEMINI_API_KEY=your_key_here
+ADMIN_SECRET_KEY=generate_secure_random_string
+```
+
+3. **Generate Initial Embeddings**
+
+```bash
+curl -X POST 'http://localhost:3000/api/admin/generate-embeddings?type=all' \
+  -H "Authorization: Bearer your_admin_secret_key"
+```
+
+4. **Test Matching**
+
+```bash
+# As authenticated client
+curl -X GET 'http://localhost:3000/api/me/match' \
+  -b cookies.txt
+```
+
+### Automated Updates
+
+For automatic embedding generation when professionals update profiles:
+
+- Use Supabase Database Triggers + Edge Functions
+- See **[INSTRUCTIONS.md](./INSTRUCTIONS.md)** Section C for implementation
+
+---
+
 ## Error Handling
 
 All endpoints return consistent error format:
@@ -522,9 +721,16 @@ Shows in directory only if:
 ## Environment Variables
 
 ```env
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# Google Gemini AI (for matching feature)
+GEMINI_API_KEY=your_gemini_api_key
+
+# Admin access (for bulk operations)
+ADMIN_SECRET_KEY=your_secure_random_string
 ```
 
 **Note:**
@@ -532,6 +738,8 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 - `NEXT_PUBLIC_*` variables are exposed to the browser
 - `SUPABASE_SERVICE_ROLE_KEY` is server-side only (never expose to client)
 - Service role key bypasses RLS policies (use with caution)
+- `GEMINI_API_KEY` is server-side only (for AI matching)
+- `ADMIN_SECRET_KEY` should be a long, random string (for admin endpoints)
 
 ---
 
@@ -548,3 +756,14 @@ ALTER TABLE users ADD COLUMN user_name text UNIQUE;
 ### Professional Verification
 
 Set `is_verified = true` in `trainer_profiles` or `nutritionist_profiles` table to allow onboarding.
+
+### AI Matching Requirements
+
+For the matching feature to work:
+
+1. **Database**: pgvector extension enabled with embedding columns
+2. **Embeddings**: Run `/api/admin/generate-embeddings` after adding professionals
+3. **Professional Data**: Must have `is_verified = true`, non-null `bio`, and embeddings
+4. **Client Data**: Must have completed onboarding with `onboarding_data`
+
+See **[INSTRUCTIONS.md](./INSTRUCTIONS.md)** for complete setup guide.

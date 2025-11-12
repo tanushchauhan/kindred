@@ -23,8 +23,21 @@ export default function SigninPage() {
         if (response.ok) {
           const data = await response.json();
           if (data.email) {
-            // User is already logged in, redirect to dashboard
-            router.push("/dashboard");
+            // User is already logged in, check role and redirect
+            const meResponse = await fetch("/api/me", {
+              credentials: "include",
+            });
+
+            if (meResponse.ok) {
+              const userData = await meResponse.json();
+              if (userData.role === "admin") {
+                router.push("/admin");
+              } else {
+                router.push("/dashboard");
+              }
+            } else {
+              router.push("/dashboard");
+            }
             return;
           }
         }
@@ -68,8 +81,22 @@ export default function SigninPage() {
         // Redirect to complete profile
         router.push("/auth/complete-profile");
       } else {
-        // Redirect to dashboard
-        router.push("/dashboard");
+        // Check user role and redirect accordingly
+        const meResponse = await fetch("/api/me", {
+          credentials: "include",
+        });
+
+        if (meResponse.ok) {
+          const userData = await meResponse.json();
+          if (userData.role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/dashboard");
+          }
+        } else {
+          // Fallback to regular dashboard
+          router.push("/dashboard");
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");

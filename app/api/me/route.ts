@@ -83,6 +83,16 @@ export async function GET() {
 
       profileData = data;
       profileError = error;
+    } else if (role === "admin") {
+      // Admin users don't have additional profile tables
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      profileData = data;
+      profileError = error;
     } else {
       return NextResponse.json({ error: "Invalid user role" }, { status: 400 });
     }

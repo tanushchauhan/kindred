@@ -114,3 +114,52 @@ export interface OnboardingResponse {
   message: string;
   data: OnboardingData;
 }
+
+/**
+ * AI Matching Types
+ */
+
+// Match result for a single professional
+export interface ProfessionalMatch {
+  user_id: string;
+  full_name: string;
+  bio: string;
+  specialties: string[];
+  reasoning: string;
+}
+
+// Complete matching result
+export interface MatchingResult {
+  matches: {
+    trainer: ProfessionalMatch;
+    nutritionist: ProfessionalMatch;
+  };
+  metadata: {
+    query_timestamp: string;
+    candidates_retrieved: {
+      trainers: number;
+      nutritionists: number;
+    };
+    processing_time_ms: number;
+  };
+}
+
+// Embedding generation result
+export interface EmbeddingGenerationResult {
+  message: string;
+  results: {
+    trainers: {
+      processed: number;
+      success: number;
+      failed: number;
+      errors: string[];
+    };
+    nutritionists: {
+      processed: number;
+      success: number;
+      failed: number;
+      errors: string[];
+    };
+  };
+  timestamp: string;
+}
