@@ -22,6 +22,9 @@ const MATCH_CONFIG = {
  * AI-powered matching endpoint that finds the best trainer and nutritionist
  * for the authenticated client based on their onboarding data.
  *
+ * IMPORTANT: This route only SUGGESTS matches - it does NOT save them to the database.
+ * To actually save the selected professionals, call PUT /api/me/match/update
+ *
  * Two-stage process:
  * 1. Vector similarity search (fast retrieval of top N candidates)
  * 2. LLM-based ranking and reasoning (intelligent final selection)
@@ -212,42 +215,77 @@ export async function GET() {
       (c: { user_id: string }) => c.user_id
     );
 
-    const { data: trainerProfiles, error: trainerProfileError } =
-      await adminSupabase
-        .from("users")
-        .select(
-          `
-        id,
-        user_name,
-        full_name,
-        trainer_profiles (bio, specialties)
-      `
-        )
-        .in("id", trainerUserIds);
+    // Fetch trainer user data
+    const { data: trainerUsers, error: trainerUserError } = await adminSupabase
+      .from("users")
+      .select("id, user_name, full_name")
+      .in("id", trainerUserIds);
 
-    const { data: nutritionistProfiles, error: nutritionistProfileError } =
+    // Fetch trainer profile data
+    const { data: trainerProfilesData, error: trainerProfileError } =
+      await adminSupabase
+        .from("trainer_profiles")
+        .select("user_id, bio, specialties")
+        .in("user_id", trainerUserIds);
+
+    // Fetch nutritionist user data
+    const { data: nutritionistUsers, error: nutritionistUserError } =
       await adminSupabase
         .from("users")
-        .select(
-          `
-        id,
-        user_name,
-        full_name,
-        nutritionist_profiles (bio, specialties)
-      `
-        )
+        .select("id, user_name, full_name")
         .in("id", nutritionistUserIds);
 
-    if (trainerProfileError || nutritionistProfileError) {
+    // Fetch nutritionist profile data
+    const { data: nutritionistProfilesData, error: nutritionistProfileError } =
+      await adminSupabase
+        .from("nutritionist_profiles")
+        .select("user_id, bio, specialties")
+        .in("user_id", nutritionistUserIds);
+
+    if (
+      trainerUserError ||
+      trainerProfileError ||
+      nutritionistUserError ||
+      nutritionistProfileError
+    ) {
       console.error(
         "Profile fetch error:",
-        trainerProfileError || nutritionistProfileError
+        trainerUserError ||
+          trainerProfileError ||
+          nutritionistUserError ||
+          nutritionistProfileError
       );
       return NextResponse.json(
         { error: "Failed to fetch candidate profiles" },
         { status: 500 }
       );
     }
+
+    // Combine user and profile data for trainers
+    const trainerProfiles = trainerUsers?.map((user) => {
+      const profile = trainerProfilesData?.find((p) => p.user_id === user.id);
+      return {
+        id: user.id,
+        user_name: user.user_name,
+        full_name: user.full_name,
+        bio: profile?.bio || "",
+        specialties: profile?.specialties || [],
+      };
+    });
+
+    // Combine user and profile data for nutritionists
+    const nutritionistProfiles = nutritionistUsers?.map((user) => {
+      const profile = nutritionistProfilesData?.find(
+        (p) => p.user_id === user.id
+      );
+      return {
+        id: user.id,
+        user_name: user.user_name,
+        full_name: user.full_name,
+        bio: profile?.bio || "",
+        specialties: profile?.specialties || [],
+      };
+    });
 
     console.log("Stage 2: Calling NVIDIA Llama for intelligent matching...");
 
@@ -262,7 +300,9 @@ export async function GET() {
 
     console.log(`Matching complete in ${processingTime}ms`);
 
-    // Return the final matches with reasoning
+    // Return the AI-suggested matches with reasoning
+    // Note: These are suggestions only - they are NOT saved to the database
+    // Use POST /api/me/match/update to actually save the selections
     return NextResponse.json({
       matches: matchResult,
       metadata: {
@@ -490,28 +530,16 @@ Respond ONLY with valid JSON in this exact format:
       user_id: selectedTrainer.id,
       user_name: selectedTrainer.user_name,
       full_name: selectedTrainer.full_name,
-      bio:
-        selectedTrainer.trainer_profiles?.[0]?.bio ||
-        selectedTrainer.nutritionist_profiles?.[0]?.bio ||
-        "",
-      specialties:
-        selectedTrainer.trainer_profiles?.[0]?.specialties ||
-        selectedTrainer.nutritionist_profiles?.[0]?.specialties ||
-        [],
+      bio: selectedTrainer.bio,
+      specialties: selectedTrainer.specialties,
       reasoning: llmResult.trainer.reasoning,
     },
     nutritionist: {
       user_id: selectedNutritionist.id,
       user_name: selectedNutritionist.user_name,
       full_name: selectedNutritionist.full_name,
-      bio:
-        selectedNutritionist.trainer_profiles?.[0]?.bio ||
-        selectedNutritionist.nutritionist_profiles?.[0]?.bio ||
-        "",
-      specialties:
-        selectedNutritionist.trainer_profiles?.[0]?.specialties ||
-        selectedNutritionist.nutritionist_profiles?.[0]?.specialties ||
-        [],
+      bio: selectedNutritionist.bio,
+      specialties: selectedNutritionist.specialties,
       reasoning: llmResult.nutritionist.reasoning,
     },
   };
@@ -523,14 +551,8 @@ interface CandidateProfile {
   id: string;
   user_name: string;
   full_name: string;
-  trainer_profiles?: Array<{
-    bio: string;
-    specialties: string[];
-  }>;
-  nutritionist_profiles?: Array<{
-    bio: string;
-    specialties: string[];
-  }>;
+  bio: string;
+  specialties: string[];
 }
 
 interface LLMMatchResponse {
