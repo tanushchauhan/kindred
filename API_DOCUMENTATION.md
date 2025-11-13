@@ -7,6 +7,10 @@ Complete API reference for the Kindred wellness platform using Next.js 15 App Ro
 1. [Authentication](#authentication)
 2. [Profile Management](#profile-management)
 3. [Client Features](#client-features)
+   - [Onboarding](#post-apimeonboarding)
+   - [AI Match Suggestions](#get-apimematch)
+   - [Current Matches](#get-apimematchcurrent)
+   - [Update Matches](#put-apimematchupdate)
 4. [Professional Features](#professional-features)
 5. [Public Directory](#public-directory)
 6. [AI Matching System](#ai-matching-system)
@@ -457,6 +461,8 @@ Save client onboarding questionnaire data.
 
 **[AI-POWERED]** Get personalized trainer and nutritionist recommendations using NVIDIA AI.
 
+**IMPORTANT:** This endpoint only returns AI suggestions - it does NOT save them to the database. To actually save the selected professionals, the client must call `PUT /api/me/match/update`.
+
 **Auth Required:** Yes (clients only)
 
 **Two-Stage Matching:**
@@ -473,7 +479,6 @@ Save client onboarding questionnaire data.
       "user_id": "uuid",
       "user_name": "johndoe",
       "full_name": "John Doe",
-      "location": "Austin, TX",
       "bio": "Experienced trainer specializing in...",
       "specialties": ["Weight Loss", "HIIT", "Strength Training"],
       "reasoning": "John is an excellent match because your goal of losing 30 pounds aligns perfectly with his specialty in weight loss and HIIT training..."
@@ -482,7 +487,6 @@ Save client onboarding questionnaire data.
       "user_id": "uuid",
       "user_name": "janesmith",
       "full_name": "Jane Smith",
-      "location": "Austin, TX",
       "bio": "Registered dietitian...",
       "specialties": ["Weight Management", "Plant-Based Nutrition"],
       "reasoning": "Jane specializes in weight management and plant-based nutrition, which directly aligns with your vegetarian dietary preferences..."
@@ -512,6 +516,172 @@ Save client onboarding questionnaire data.
 - Client must have completed onboarding
 - At least one verified professional with embeddings in database
 - NVIDIA_API_KEY configured
+
+**Workflow:**
+
+1. Client calls this endpoint to get AI recommendations
+2. Client reviews the suggested matches (with reasoning)
+3. Client decides to either:
+   - Accept AI suggestions via `PUT /api/me/match/update`
+   - Choose different professionals manually via `PUT /api/me/match/update`
+   - Get new AI recommendations (call this endpoint again)
+
+---
+
+### GET /api/me/match/current
+
+Get the client's currently saved trainer and nutritionist matches.
+
+**Auth Required:** Yes (clients only)
+
+**Success Response (200):**
+
+```json
+{
+  "matches": {
+    "trainer": {
+      "user_id": "uuid",
+      "user_name": "johndoe",
+      "full_name": "John Doe",
+      "location": "Austin, TX",
+      "bio": "Experienced trainer specializing in...",
+      "specialties": ["Weight Loss", "HIIT", "Strength Training"],
+      "is_verified": true
+    },
+    "nutritionist": {
+      "user_id": "uuid",
+      "user_name": "janesmith",
+      "full_name": "Jane Smith",
+      "location": "Boston, MA",
+      "bio": "Registered dietitian...",
+      "specialties": ["Weight Management", "Plant-Based Nutrition"],
+      "is_verified": true
+    }
+  },
+  "metadata": {
+    "created_at": "2025-11-01T10:00:00.000Z",
+    "last_updated": "2025-11-13T14:30:00.000Z"
+  }
+}
+```
+
+**Success Response (200) - No matches:**
+
+If either professional is not selected, the value will be `null`:
+
+```json
+{
+  "matches": {
+    "trainer": null,
+    "nutritionist": {
+      "user_id": "uuid",
+      "user_name": "janesmith",
+      "full_name": "Jane Smith",
+      "bio": "Registered dietitian...",
+      "specialties": ["Weight Management"],
+      "is_verified": true
+    }
+  },
+  "metadata": {
+    "created_at": "2025-11-01T10:00:00.000Z",
+    "last_updated": "2025-11-13T14:30:00.000Z"
+  }
+}
+```
+
+**Error Responses:**
+
+- `401` - Not authenticated
+- `403` - Not a client
+- `404` - No matches found (client has never selected any professionals)
+
+**Notes:**
+
+- Returns the professionals currently saved in `client_matches` table
+- These are the committed selections, not AI suggestions
+- Used to display "My Wellness Team" on the client dashboard
+
+---
+
+### PUT /api/me/match/update
+
+Save or update the client's trainer and/or nutritionist selections.
+
+**Auth Required:** Yes (clients only)
+
+**Request Body:**
+
+```json
+{
+  "trainerId": "uuid",
+  "nutritionistId": "uuid"
+}
+```
+
+**Optional Fields:**
+
+- `trainerId` (string | null) - Update trainer selection (omit to keep current)
+- `nutritionistId` (string | null) - Update nutritionist selection (omit to keep current)
+- Pass `null` to clear a selection
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Match selection updated successfully",
+  "updated": {
+    "trainer": true,
+    "nutritionist": true
+  }
+}
+```
+
+**Error Responses:**
+
+- `400` - No fields provided, or invalid/unverified professional ID
+- `401` - Not authenticated
+- `403` - Not a client
+- `500` - Server error
+
+**Validation:**
+
+- Validates that professional IDs exist and are verified
+- Creates new match record if none exists for client
+- Updates existing match record if one exists
+
+**Examples:**
+
+Update both:
+
+```json
+{
+  "trainerId": "trainer-uuid",
+  "nutritionistId": "nutritionist-uuid"
+}
+```
+
+Update only trainer:
+
+```json
+{
+  "trainerId": "trainer-uuid"
+}
+```
+
+Clear trainer selection:
+
+```json
+{
+  "trainerId": null
+}
+```
+
+**Notes:**
+
+- This is the ONLY endpoint that saves matches to the database
+- Used for both AI-suggested matches and manual selections
+- Can be called multiple times to change selections
+- Automatically updates `last_updated` timestamp
 
 ---
 
@@ -1079,8 +1249,14 @@ NVIDIA_API_KEY=your_nvidia_api_key
 4. **Complete Profile**: `POST /api/auth/complete-profile` (role: "client")
 5. **Dashboard**: `GET /api/me` → redirect to onboarding if needed
 6. **Onboarding**: `POST /api/me/onboarding`
-7. **Get Matches**: `GET /api/me/match`
-8. **View Professional**: `GET /api/professionals/[username]`
+7. **Get AI Recommendations**: `GET /api/me/match` (suggestions only, not saved)
+8. **Review Matches**: View AI reasoning and professional profiles
+9. **Save Selection**:
+   - Option A: Accept AI suggestions → `PUT /api/me/match/update` with AI-provided user IDs
+   - Option B: Browse all professionals → `GET /api/professionals` → `PUT /api/me/match/update` with chosen IDs
+10. **View Current Matches**: `GET /api/me/match/current`
+11. **Change Matches**: Call `GET /api/me/match` again for new suggestions OR `PUT /api/me/match/update` to manually change
+12. **View Professional Details**: `GET /api/professionals/[username]`
 
 ### Professional Registration & Approval
 
@@ -1149,11 +1325,30 @@ curl -X GET http://localhost:3000/api/me \
   -b cookies.txt
 ```
 
-**Get Matches:**
+**Get AI Match Suggestions:**
 
 ```bash
 curl -X GET http://localhost:3000/api/me/match \
   -b cookies.txt
+```
+
+**Get Current Saved Matches:**
+
+```bash
+curl -X GET http://localhost:3000/api/me/match/current \
+  -b cookies.txt
+```
+
+**Save Match Selection:**
+
+```bash
+curl -X PUT http://localhost:3000/api/me/match/update \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{
+    "trainerId":"trainer-uuid",
+    "nutritionistId":"nutritionist-uuid"
+  }'
 ```
 
 ### Using JavaScript/TypeScript
@@ -1175,8 +1370,25 @@ const profile = await fetch("/api/me", {
   credentials: "include",
 });
 
-// Get Matches
-const matches = await fetch("/api/me/match", {
+// Get AI Match Suggestions (not saved)
+const aiSuggestions = await fetch("/api/me/match", {
+  credentials: "include",
+});
+const { matches } = await aiSuggestions.json();
+
+// Save the AI suggestions (or any professional IDs)
+const saveResponse = await fetch("/api/me/match/update", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({
+    trainerId: matches.trainer.user_id,
+    nutritionistId: matches.nutritionist.user_id,
+  }),
+});
+
+// Get currently saved matches
+const currentMatches = await fetch("/api/me/match/current", {
   credentials: "include",
 });
 ```
