@@ -9,9 +9,9 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Configuration for the matching algorithm
 const MATCH_CONFIG = {
   // Number of candidates to retrieve from vector search (Stage 1)
-  CANDIDATES_PER_ROLE: 10,
+  CANDIDATES_PER_ROLE: 30,
   // Minimum similarity threshold for vector search (0-1 scale)
-  SIMILARITY_THRESHOLD: 0.25,
+  SIMILARITY_THRESHOLD: 0.001,
   // NVIDIA Llama 3.1 Nemotron Ultra model for final ranking and reasoning
   LLM_MODEL: "nvidia/llama-3.1-nemotron-ultra-253b-v1",
 };
