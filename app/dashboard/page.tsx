@@ -559,6 +559,36 @@ export default function DashboardPage() {
                   </p>
                 </Link>
                 <Link
+                  href="/plans"
+                  className="border-2 border-green-300 bg-linear-to-br from-green-50 to-blue-50 rounded-lg p-4 hover:border-green-500 hover:shadow-lg transition text-center"
+                >
+                  <div className="text-2xl mb-2">📋</div>
+                  <h4 className="font-medium text-gray-900">My Plans</h4>
+                  <p className="text-xs text-green-600 mt-1 font-medium">
+                    View nutrition & exercise plans
+                  </p>
+                </Link>
+                <Link
+                  href="/progress"
+                  className="border-2 border-blue-300 bg-linear-to-br from-blue-50 to-purple-50 rounded-lg p-4 hover:border-blue-500 hover:shadow-lg transition text-center"
+                >
+                  <div className="text-2xl mb-2">📊</div>
+                  <h4 className="font-medium text-gray-900">My Progress</h4>
+                  <p className="text-xs text-blue-600 mt-1 font-medium">
+                    Track your wellness journey
+                  </p>
+                </Link>
+                <Link
+                  href="/health-data"
+                  className="border-2 border-purple-300 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg p-4 hover:border-purple-500 hover:shadow-lg transition text-center"
+                >
+                  <div className="text-2xl mb-2">💚</div>
+                  <h4 className="font-medium text-gray-900">Health Data</h4>
+                  <p className="text-xs text-purple-600 mt-1 font-medium">
+                    Log nutrition & fitness data
+                  </p>
+                </Link>
+                <Link
                   href="/onboarding"
                   className="border border-gray-300 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition text-center"
                 >
@@ -596,6 +626,20 @@ export default function DashboardPage() {
                 </h4>
                 <p className="text-xs text-gray-500 mt-1">
                   Update bio and specialties
+                </p>
+              </Link>
+            )}
+
+            {(profile.role === "trainer" ||
+              profile.role === "nutritionist") && (
+              <Link
+                href="/professionals/clients"
+                className="border-2 border-blue-300 bg-linear-to-br from-blue-50 to-purple-50 rounded-lg p-4 hover:border-blue-500 hover:shadow-lg transition text-center"
+              >
+                <div className="text-2xl mb-2">👥</div>
+                <h4 className="font-medium text-gray-900">My Clients</h4>
+                <p className="text-xs text-blue-600 mt-1 font-medium">
+                  Manage plans and track progress
                 </p>
               </Link>
             )}

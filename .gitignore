@@ -42,3 +42,4 @@ next-env.d.ts
 
 # scripts to check features
 test_scripts
+migrations
