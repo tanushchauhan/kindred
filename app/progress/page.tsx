@@ -149,9 +149,9 @@ export default function ProgressPage() {
     );
   }
 
-  const avgCalories = getAverageValue("nutrition.calories_consumed");
-  const avgSteps = getAverageValue("fitness.steps");
-  const avgActiveEnergy = getAverageValue("fitness.active_energy_burned");
+  const avgCalories = getAverageValue("calories");
+  const avgSteps = getAverageValue("steps");
+  const avgWater = getAverageValue("water");
   const completionRate = getCompletionRate();
 
   return (
@@ -202,6 +202,7 @@ export default function ProgressPage() {
             <div className="text-3xl font-bold text-blue-600">
               {completionRate}%
             </div>
+            <p className="text-xs text-gray-500 mt-1">Based on past 30 days</p>
             <p className="text-xs text-gray-500 mt-1">
               {completions.length} exercises completed
             </p>
@@ -236,14 +237,14 @@ export default function ProgressPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-500">
-                Active Energy
+                Water Intake
               </h3>
-              <span className="text-2xl">⚡</span>
+              <span className="text-2xl">💧</span>
             </div>
             <div className="text-3xl font-bold text-purple-600">
-              {Math.round(avgActiveEnergy)}
+              {Math.round(avgWater)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">kcal burned</p>
+            <p className="text-xs text-gray-500 mt-1">ml consumed</p>
           </div>
         </div>
 
