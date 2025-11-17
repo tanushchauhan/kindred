@@ -37,9 +37,9 @@ try {
         -TimeoutSec 10
 
     Write-Host "✅ SUCCESS! Bearer token authentication is WORKING!" -ForegroundColor Green
-    Write-Host "   User ID: $($profileResponse.id)" -ForegroundColor Gray
-    Write-Host "   Email: $($profileResponse.email)" -ForegroundColor Gray
-    Write-Host "   Role: $($profileResponse.role)" -ForegroundColor Gray
+    Write-Host "   User ID: $($profileResponse.user.id)" -ForegroundColor Gray
+    Write-Host "   Email: $($profileResponse.user.email)" -ForegroundColor Gray
+    Write-Host "   Role: $($profileResponse.user.role)" -ForegroundColor Gray
     
     Write-Host "`n" + ("=" * 70)
     Write-Host "🎉 VERIFIED: Bearer token authentication is deployed and working!" -ForegroundColor Green
