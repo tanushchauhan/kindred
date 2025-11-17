@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies, headers } from "next/headers";
 
 /**
@@ -19,7 +20,24 @@ export async function createServerSupabaseClient() {
     ? authHeader.substring(7)
     : null;
 
-  // Create the base Supabase client with cookie support
+  // If Bearer token is provided, create a client with that token
+  if (bearerToken) {
+    const supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        },
+      }
+    );
+    
+    return supabaseClient;
+  }
+
+  // Otherwise, use cookie-based authentication for web clients
   const supabaseClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -42,21 +60,6 @@ export async function createServerSupabaseClient() {
       },
     }
   );
-
-  // If a Bearer token is provided, set it as the session
-  // This allows mobile apps to authenticate via Authorization header
-  if (bearerToken) {
-    // Set the access token in the Supabase client
-    // The client will use this token for all subsequent requests
-    const { data, error } = await supabaseClient.auth.setSession({
-      access_token: bearerToken,
-      refresh_token: "", // Not needed for token validation
-    });
-
-    if (error) {
-      console.error("Error setting bearer token session:", error);
-    }
-  }
 
   return supabaseClient;
 }
