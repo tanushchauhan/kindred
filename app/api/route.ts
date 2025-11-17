@@ -26,7 +26,8 @@ export async function GET() {
         node: process.version,
         env: process.env.NODE_ENV ?? "development",
       },
-      notes: "This endpoint is intended for developer greetings & quick info.",
+      notes:
+        "This endpoint is intended for developer greetings and quick info.",
     };
 
     return NextResponse.json(payload);
