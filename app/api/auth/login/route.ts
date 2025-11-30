@@ -7,12 +7,21 @@ import { createServerSupabaseClient } from "@/lib/supabaseServer";
  */
 export async function POST(request: Request) {
   try {
+    console.log("Login request received");
+    console.log("Environment check:", {
+      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    });
+
     // Create server-side Supabase client
     const supabase = await createServerSupabaseClient();
+    console.log("Supabase client created successfully");
 
     // Parse the request body
     const body = await request.json();
     const { email, password } = body;
+    console.log("Login attempt for email:", email);
 
     // Validate required fields
     if (!email || !password) {

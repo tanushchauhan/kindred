@@ -7,12 +7,20 @@ import { createServerSupabaseClient } from "@/lib/supabaseServer";
  */
 export async function POST(request: Request) {
   try {
+    console.log("Signup request received");
+    console.log("Environment check:", {
+      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    });
+
     // Create server-side Supabase client
     const supabase = await createServerSupabaseClient();
+    console.log("Supabase client created successfully");
 
     // Parse the request body
     const body = await request.json();
     const { email, password } = body;
+    console.log("Signup attempt for email:", email);
 
     // Validate required fields
     if (!email || !password) {
@@ -42,14 +50,18 @@ export async function POST(request: Request) {
     }
 
     // Sign up the user with Supabase Auth
+    console.log("Calling Supabase signUp...");
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (authError) {
+      console.error("Supabase signup error:", authError);
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
+
+    console.log("Signup successful, user ID:", authData.user?.id);
 
     if (!authData.user) {
       return NextResponse.json(

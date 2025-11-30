@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 /**
  * Creates a Supabase client for server-side operations in API routes
  * Supports both cookie-based auth (web) and Bearer token auth (mobile)
- * 
+ *
  * Authentication priority:
  * 1. Authorization: Bearer <token> header (for mobile/cross-origin)
  * 2. Session cookies (for web/same-origin)
@@ -22,6 +22,7 @@ export async function createServerSupabaseClient() {
 
   // If Bearer token is provided, create a client with that token
   if (bearerToken) {
+    console.log("Using Bearer token authentication");
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -33,10 +34,11 @@ export async function createServerSupabaseClient() {
         },
       }
     );
-    
+
     return supabaseClient;
   }
 
+  console.log("Using cookie-based authentication");
   // Otherwise, use cookie-based authentication for web clients
   const supabaseClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,10 +53,11 @@ export async function createServerSupabaseClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
-          } catch {
+          } catch (error) {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
+            console.error("Cookie set error:", error);
           }
         },
       },
@@ -63,3 +66,4 @@ export async function createServerSupabaseClient() {
 
   return supabaseClient;
 }
+
