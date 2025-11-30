@@ -7,21 +7,12 @@ import { createServerSupabaseClient } from "@/lib/supabaseServer";
  */
 export async function POST(request: Request) {
   try {
-    console.log("Login request received");
-    console.log("Environment check:", {
-      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    });
-
     // Create server-side Supabase client
     const supabase = await createServerSupabaseClient();
-    console.log("Supabase client created successfully");
 
     // Parse the request body
     const body = await request.json();
     const { email, password } = body;
-    console.log("Login attempt for email:", email);
 
     // Validate required fields
     if (!email || !password) {
@@ -47,19 +38,15 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      console.error("Supabase sign in error:", error);
       return NextResponse.json(
-        { error: "Invalid credentials", details: error.message },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
 
     if (!data.session) {
-      console.error("No session returned after sign in");
-      return NextResponse.json({ error: "Login failed - no session" }, { status: 401 });
+      return NextResponse.json({ error: "Login failed" }, { status: 401 });
     }
-
-    console.log("Login successful for user:", data.user.email);
 
     // Return success response with session data
     return NextResponse.json(

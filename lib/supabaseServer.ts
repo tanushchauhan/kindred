@@ -22,7 +22,6 @@ export async function createServerSupabaseClient() {
 
   // If Bearer token is provided, create a client with that token
   if (bearerToken) {
-    console.log("Using Bearer token authentication");
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -38,7 +37,6 @@ export async function createServerSupabaseClient() {
     return supabaseClient;
   }
 
-  console.log("Using cookie-based authentication");
   // Otherwise, use cookie-based authentication for web clients
   const supabaseClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,11 +51,10 @@ export async function createServerSupabaseClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
-          } catch (error) {
+          } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
-            console.error("Cookie set error:", error);
           }
         },
       },
@@ -66,4 +63,3 @@ export async function createServerSupabaseClient() {
 
   return supabaseClient;
 }
-
