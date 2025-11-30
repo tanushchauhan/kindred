@@ -38,15 +38,19 @@ export async function POST(request: Request) {
     });
 
     if (error) {
+      console.error("Supabase sign in error:", error);
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid credentials", details: error.message },
         { status: 401 }
       );
     }
 
     if (!data.session) {
-      return NextResponse.json({ error: "Login failed" }, { status: 401 });
+      console.error("No session returned after sign in");
+      return NextResponse.json({ error: "Login failed - no session" }, { status: 401 });
     }
+
+    console.log("Login successful for user:", data.user.email);
 
     // Return success response with session data
     return NextResponse.json(
