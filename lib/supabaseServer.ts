@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 /**
  * Creates a Supabase client for server-side operations in API routes
  * Supports both cookie-based auth (web) and Bearer token auth (mobile)
- * 
+ *
  * Authentication priority:
  * 1. Authorization: Bearer <token> header (for mobile/cross-origin)
  * 2. Session cookies (for web/same-origin)
@@ -33,7 +33,7 @@ export async function createServerSupabaseClient() {
         },
       }
     );
-    
+
     return supabaseClient;
   }
 

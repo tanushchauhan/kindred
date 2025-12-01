@@ -17,9 +17,6 @@ export async function POST(request: Request) {
       error: authError,
     } = await supabase.auth.getUser();
 
-    console.log("Auth check - User:", user?.id, "Email:", user?.email);
-    console.log("Auth error:", authError);
-
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -33,10 +30,8 @@ export async function POST(request: Request) {
 
     if (userError) {
       console.error("Error fetching user role:", userError);
-      console.error("User ID:", user.id);
-      console.error("Error details:", JSON.stringify(userError, null, 2));
       return NextResponse.json(
-        { error: "Failed to verify user role", details: userError.message },
+        { error: "Failed to verify user role" },
         { status: 500 }
       );
     }
