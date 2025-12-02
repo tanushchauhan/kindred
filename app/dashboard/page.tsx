@@ -643,6 +643,20 @@ export default function DashboardPage() {
                 </p>
               </Link>
             )}
+
+            {(profile.role === "trainer" ||
+              profile.role === "nutritionist") && (
+              <Link
+                href="/dashboard/chat"
+                className="border-2 border-indigo-300 bg-linear-to-br from-indigo-50 to-purple-50 rounded-lg p-4 hover:border-indigo-500 hover:shadow-lg transition text-center"
+              >
+                <div className="text-2xl mb-2">💬</div>
+                <h4 className="font-medium text-gray-900">Messages</h4>
+                <p className="text-xs text-indigo-600 mt-1 font-medium">
+                  Chat with your clients
+                </p>
+              </Link>
+            )}
           </div>
         </div>
 

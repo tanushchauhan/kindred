@@ -346,3 +346,41 @@ export interface MarkExerciseCompleteRequest {
   completed: boolean;
   notes?: string;
 }
+
+// Chat Types
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+  sender?: {
+    id: string;
+    full_name: string | null;
+    user_name: string | null;
+    role: UserRole;
+  };
+}
+
+export interface ChatParticipant {
+  conversation_id: string;
+  user_id: string;
+  joined_at: string;
+  user?: {
+    id: string;
+    full_name: string | null;
+    user_name: string | null;
+    role: UserRole;
+  };
+}
+
+export interface Conversation {
+  id: string;
+  is_group: boolean;
+  group_name: string | null;
+  created_at: string;
+  updated_at: string;
+  participants?: { user: { id: string; full_name: string | null; user_name: string | null; role: UserRole } }[];
+  messages?: { content: string; created_at: string; is_read: boolean }[];
+}
