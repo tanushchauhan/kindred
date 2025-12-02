@@ -15,6 +15,7 @@ export interface User {
   gender: string | null;
   location: string | null;
   birth_date: string | null;
+  profile_image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -360,6 +361,7 @@ export interface ChatMessage {
     full_name: string | null;
     user_name: string | null;
     role: UserRole;
+    profile_image_url?: string | null;
   };
 }
 
@@ -372,6 +374,7 @@ export interface ChatParticipant {
     full_name: string | null;
     user_name: string | null;
     role: UserRole;
+    profile_image_url?: string | null;
   };
 }
 
@@ -381,6 +384,14 @@ export interface Conversation {
   group_name: string | null;
   created_at: string;
   updated_at: string;
-  participants?: { user: { id: string; full_name: string | null; user_name: string | null; role: UserRole } }[];
+  participants?: {
+    user: {
+      id: string;
+      full_name: string | null;
+      user_name: string | null;
+      role: UserRole;
+      profile_image_url?: string | null;
+    };
+  }[];
   messages?: { content: string; created_at: string; is_read: boolean }[];
 }

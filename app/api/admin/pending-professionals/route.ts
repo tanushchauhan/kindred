@@ -41,6 +41,7 @@ export async function GET() {
           user_name,
           phone_number,
           location,
+          profile_image_url,
           created_at
         )
       `
@@ -72,6 +73,7 @@ export async function GET() {
           user_name,
           phone_number,
           location,
+          profile_image_url,
           created_at
         )
       `

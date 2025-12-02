@@ -85,7 +85,7 @@ export default function ChatPage() {
             .select(
               `
               *,
-              sender:users(id, full_name, user_name, role)
+              sender:users(id, full_name, user_name, role, profile_image_url)
             `
             )
             .eq("id", newMsgId)
@@ -128,7 +128,7 @@ export default function ChatPage() {
           `
           *,
           participants:conversation_participants(
-            user:users(id, full_name, user_name, role)
+            user:users(id, full_name, user_name, role, profile_image_url)
           ),
           messages(
             content,
@@ -266,6 +266,15 @@ export default function ChatPage() {
       : "";
   };
 
+  const getConversationAvatar = (conv: Conversation) => {
+    if (conv.is_group) return null;
+
+    const otherParticipant = conv.participants?.find(
+      (p) => p.user && p.user.id !== user?.id
+    );
+    return otherParticipant?.user?.profile_image_url || null;
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar - Conversation List */}
@@ -298,29 +307,46 @@ export default function ChatPage() {
                     : ""
                 }`}
               >
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-medium text-gray-900 truncate pr-2">
-                    {getConversationName(conv)}
-                  </h3>
-                  {conv.messages && conv.messages[0] && (
-                    <span className="text-xs text-gray-500 whitespace-nowrap">
-                      {new Date(
-                        conv.messages[0].created_at
-                      ).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600 truncate flex-1 pr-2">
-                    {conv.messages && conv.messages[0]
-                      ? conv.messages[0].content
-                      : "No messages yet"}
-                  </p>
-                  {conv.is_group && (
-                    <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
-                      Group
-                    </span>
-                  )}
+                <div className="flex items-center">
+                  <div className="mr-3 flex-shrink-0">
+                    {getConversationAvatar(conv) ? (
+                      <img
+                        src={getConversationAvatar(conv)!}
+                        alt="Avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                        {getConversationName(conv).charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-medium text-gray-900 truncate pr-2">
+                        {getConversationName(conv)}
+                      </h3>
+                      {conv.messages && conv.messages[0] && (
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                          {new Date(
+                            conv.messages[0].created_at
+                          ).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-gray-600 truncate flex-1 pr-2">
+                        {conv.messages && conv.messages[0]
+                          ? conv.messages[0].content
+                          : "No messages yet"}
+                      </p>
+                      {conv.is_group && (
+                        <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
+                          Group
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))
@@ -344,13 +370,30 @@ export default function ChatPage() {
               >
                 ←
               </button>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {getConversationName(selectedConversation)}
-                </h2>
-                <p className="text-xs text-gray-500">
-                  {getConversationSubtitle(selectedConversation)}
-                </p>
+              <div className="flex items-center">
+                <div className="mr-3">
+                  {getConversationAvatar(selectedConversation) ? (
+                    <img
+                      src={getConversationAvatar(selectedConversation)!}
+                      alt="Avatar"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                      {getConversationName(selectedConversation)
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {getConversationName(selectedConversation)}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {getConversationSubtitle(selectedConversation)}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -375,6 +418,27 @@ export default function ChatPage() {
                         isMe ? "justify-end" : "justify-start"
                       }`}
                     >
+                      {!isMe && (
+                        <div className="mr-2 flex-shrink-0 self-end mb-1">
+                          {msg.sender?.profile_image_url ? (
+                            <img
+                              src={msg.sender.profile_image_url}
+                              alt="Avatar"
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-semibold">
+                              {(
+                                msg.sender?.full_name ||
+                                msg.sender?.user_name ||
+                                "?"
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <div
                         className={`max-w-[75%] rounded-2xl px-4 py-2 shadow-sm ${
                           isMe

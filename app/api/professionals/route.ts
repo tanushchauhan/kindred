@@ -19,6 +19,7 @@ export async function GET() {
         full_name,
         user_name,
         location,
+        profile_image_url,
         trainer_profiles!inner (
           bio,
           specialties,
@@ -44,6 +45,7 @@ export async function GET() {
         full_name,
         user_name,
         location,
+        profile_image_url,
         nutritionist_profiles!inner (
           bio,
           specialties,

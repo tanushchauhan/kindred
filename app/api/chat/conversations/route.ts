@@ -41,7 +41,7 @@ export async function GET() {
         created_at,
         updated_at,
         participants:conversation_participants(
-          user:users(id, full_name, user_name, role)
+          user:users(id, full_name, user_name, role, profile_image_url)
         ),
         messages(
           content,
@@ -88,6 +88,9 @@ export async function GET() {
           (u) => u.user_name || "unknown"
         ),
         participant_roles: participantsToReturn.map((u) => u.role),
+        participant_images: participantsToReturn.map(
+          (u) => u.profile_image_url
+        ),
         is_group: conv.is_group,
         group_name: conv.group_name,
         last_message: lastMsg ? lastMsg.content : null,

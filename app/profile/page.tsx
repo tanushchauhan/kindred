@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AvatarUpload from "@/app/components/AvatarUpload";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function ProfilePage() {
     gender: string | null;
     location: string | null;
     birth_date: string | null;
+    profile_image_url: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,6 +53,7 @@ export default function ProfilePage() {
         gender: data.gender,
         location: data.location,
         birth_date: data.birth_date,
+        profile_image_url: data.profile_image_url,
       });
 
       // Initialize form fields with current profile data
@@ -100,6 +103,7 @@ export default function ProfilePage() {
         gender: data.profile.gender,
         location: data.profile.location,
         birth_date: data.profile.birth_date,
+        profile_image_url: profile?.profile_image_url || null,
       });
 
       // Clear success message after 3 seconds
@@ -171,6 +175,19 @@ export default function ProfilePage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex justify-center mb-8">
+              <AvatarUpload
+                currentAvatarUrl={profile.profile_image_url}
+                onUploadComplete={(url) => {
+                  setProfile((prev) =>
+                    prev ? { ...prev, profile_image_url: url } : null
+                  );
+                  setSuccessMessage("Profile picture updated!");
+                  setTimeout(() => setSuccessMessage(""), 3000);
+                }}
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="fullName"

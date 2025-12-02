@@ -43,7 +43,7 @@ export async function GET(
         content,
         created_at,
         is_read,
-        sender:users(id, full_name, user_name, role)
+        sender:users(id, full_name, user_name, role, profile_image_url)
       `
       )
       .eq("conversation_id", conversationId)
@@ -61,6 +61,7 @@ export async function GET(
       sender_name: msg.sender?.full_name || "Unknown",
       sender_username: msg.sender?.user_name || "unknown",
       sender_role: msg.sender?.role || "client",
+      sender_image: msg.sender?.profile_image_url || null,
       content: msg.content,
       created_at: msg.created_at,
       read: msg.is_read,

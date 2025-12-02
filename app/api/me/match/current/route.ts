@@ -77,7 +77,7 @@ export async function GET() {
     if (match.selected_trainer_id) {
       const { data: trainerUser } = await supabase
         .from("users")
-        .select("id, user_name, full_name, location")
+        .select("id, user_name, full_name, location, profile_image_url")
         .eq("id", match.selected_trainer_id)
         .single();
 
@@ -94,6 +94,7 @@ export async function GET() {
             user_name: trainerUser.user_name,
             full_name: trainerUser.full_name,
             location: trainerUser.location,
+            profile_image_url: trainerUser.profile_image_url,
             bio: trainerProfile.bio || "",
             specialties: trainerProfile.specialties || [],
             is_verified: trainerProfile.is_verified,
@@ -107,7 +108,7 @@ export async function GET() {
     if (match.selected_nutritionist_id) {
       const { data: nutritionistUser } = await supabase
         .from("users")
-        .select("id, user_name, full_name, location")
+        .select("id, user_name, full_name, location, profile_image_url")
         .eq("id", match.selected_nutritionist_id)
         .single();
 
@@ -124,6 +125,7 @@ export async function GET() {
             user_name: nutritionistUser.user_name,
             full_name: nutritionistUser.full_name,
             location: nutritionistUser.location,
+            profile_image_url: nutritionistUser.profile_image_url,
             bio: nutritionistProfile.bio || "",
             specialties: nutritionistProfile.specialties || [],
             is_verified: nutritionistProfile.is_verified,
