@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@theme {
+  --color-background: #faf7f1;
+  --color-foreground: #11181c;
+  --color-card: #ffffff;
+  --color-tint: #0a7ea4;
+  --color-teal: #5dbeaa;
+  --color-orange: #ff9f43;
+  --color-green: #81ac5d;
+  --color-scroll-bg: #daefe7;
+  --color-subtext: #666666;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

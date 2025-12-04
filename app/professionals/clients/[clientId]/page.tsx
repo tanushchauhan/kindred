@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import NutritionPlanForm from "@/app/components/NutritionPlanForm";
-import ExercisePlanForm from "@/app/components/ExercisePlanForm";
 
 interface NutritionPlan {
   id: string;
@@ -499,10 +498,9 @@ export default function ClientDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading client data...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-teal)] mx-auto"></div>
         </div>
       </div>
     );
@@ -510,12 +508,12 @@ export default function ClientDetailPage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || "Failed to load data"}</p>
           <button
             onClick={() => router.push("/professionals/clients")}
-            className="text-blue-600 hover:text-blue-700"
+            className="text-[var(--color-teal)] hover:underline"
           >
             ← Back to Clients
           </button>
@@ -525,107 +523,137 @@ export default function ClientDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/professionals/clients"
-                className="text-gray-600 hover:text-gray-900"
+    <div className="min-h-screen bg-[var(--color-background)] p-6 md:p-12 font-sans">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/professionals/clients"
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[var(--color-teal)] shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                ← Clients
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {clientInfo?.full_name || "Client"}
-                </h1>
-                {clientInfo?.user_name && (
-                  <p className="text-sm text-gray-500">
-                    @{clientInfo.user_name}
-                  </p>
-                )}
-              </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-[var(--color-foreground)]">
+                {clientInfo?.full_name || "Client"}
+              </h1>
+              {clientInfo?.user_name && (
+                <p className="text-[var(--color-subtext)]">
+                  @{clientInfo.user_name}
+                </p>
+              )}
             </div>
+          </div>
+          <div className="mt-4 md:mt-0">
             <Link
               href="/dashboard"
-              className="text-sm text-gray-600 hover:text-gray-900"
+              className="inline-flex items-center text-[var(--color-teal)] hover:underline"
             >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
               Dashboard
             </Link>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200">
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab("plans")}
-              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "plans"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              📋 Plans
-            </button>
-            <button
-              onClick={() => setActiveTab("progress")}
-              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "progress"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              📊 Progress
-            </button>
-            <button
-              onClick={() => setActiveTab("health")}
-              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "health"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              💚 Health Data
-            </button>
-          </div>
+        <div className="flex space-x-2 mb-8 bg-white p-1.5 rounded-2xl w-fit shadow-sm border border-gray-100">
+          <button
+            onClick={() => setActiveTab("plans")}
+            className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "plans"
+                ? "bg-[var(--color-teal)] text-white shadow-sm"
+                : "text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            Plans
+          </button>
+          <button
+            onClick={() => setActiveTab("progress")}
+            className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "progress"
+                ? "bg-[var(--color-teal)] text-white shadow-sm"
+                : "text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            Progress
+          </button>
+          <button
+            onClick={() => setActiveTab("health")}
+            className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "health"
+                ? "bg-[var(--color-teal)] text-white shadow-sm"
+                : "text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            Health Data
+          </button>
         </div>
 
         {/* Plans Tab */}
         {activeTab === "plans" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-[var(--color-foreground)]">
                 {profile.role === "nutritionist"
                   ? "Nutrition Plans"
                   : "Exercise Plans"}
               </h2>
               <button
-                onClick={() => setShowCreatePlanModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                onClick={() => {
+                  if (profile.role === "trainer") {
+                    router.push(
+                      `/professionals/clients/${clientId}/exercise-plans/create`
+                    );
+                  } else {
+                    setShowCreatePlanModal(true);
+                  }
+                }}
+                className="bg-[var(--color-teal)] text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition-opacity shadow-sm"
               >
                 + Create New Plan
               </button>
             </div>
 
             {profile.role === "nutritionist" && nutritionPlans.length === 0 && (
-              <div className="bg-white rounded-lg shadow p-12 text-center">
-                <div className="text-6xl mb-4">📋</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-100">
+                <div className="w-20 h-20 bg-[var(--color-background)] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-4xl">📋</span>
+                </div>
+                <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
                   No Nutrition Plans Yet
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-[var(--color-subtext)] mb-6 max-w-md mx-auto">
                   Create a nutrition plan to help your client reach their
                   wellness goals
                 </p>
                 <button
                   onClick={() => setShowCreatePlanModal(true)}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                  className="bg-[var(--color-teal)] text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
                 >
                   Create First Plan
                 </button>
@@ -636,15 +664,15 @@ export default function ClientDetailPage() {
               nutritionPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="bg-white rounded-lg shadow-md p-6"
+                  className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-bold text-[var(--color-foreground)]">
                         {plan.title}
                       </h3>
                       {plan.description && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-[var(--color-subtext)] mt-1">
                           {plan.description}
                         </p>
                       )}
@@ -652,98 +680,94 @@ export default function ClientDetailPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleNutritionPlanActive(plan.id)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer hover:opacity-80 ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
                           plan.is_active
-                            ? "bg-green-100 text-green-800 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-600"
                         }`}
-                        title={
-                          plan.is_active
-                            ? "Click to deactivate"
-                            : "Click to activate"
-                        }
                       >
-                        {plan.is_active ? "✓ Active" : "Inactive"}
+                        {plan.is_active ? "Active" : "Inactive"}
                       </button>
                       <button
                         onClick={() => setEditingNutritionPlan(plan)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition"
-                        title="Edit plan"
+                        className="p-2 text-[var(--color-teal)] hover:bg-[var(--color-background)] rounded-lg transition"
                       >
                         <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
                         </svg>
                       </button>
                       <button
                         onClick={() => handleDeleteNutritionPlan(plan.id)}
                         disabled={deletingPlanId === plan.id}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition disabled:opacity-50"
-                        title="Delete plan"
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
                       >
-                        {deletingPlanId === plan.id ? (
-                          <span className="text-xs">...</span>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Start Date:</span>
-                      <span className="ml-2 font-medium">
+                  <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                    <div className="bg-[var(--color-background)] p-3 rounded-xl">
+                      <span className="text-[var(--color-subtext)] block text-xs mb-1">
+                        Start Date
+                      </span>
+                      <span className="font-medium text-[var(--color-foreground)]">
                         {new Date(plan.start_date).toLocaleDateString()}
                       </span>
                     </div>
                     {plan.end_date && (
-                      <div>
-                        <span className="text-gray-500">End Date:</span>
-                        <span className="ml-2 font-medium">
+                      <div className="bg-[var(--color-background)] p-3 rounded-xl">
+                        <span className="text-[var(--color-subtext)] block text-xs mb-1">
+                          End Date
+                        </span>
+                        <span className="font-medium text-[var(--color-foreground)]">
                           {new Date(plan.end_date).toLocaleDateString()}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="border-t pt-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                  <div className="border-t border-gray-100 pt-4">
+                    <h4 className="text-sm font-bold text-[var(--color-foreground)] mb-3">
                       Macro Goals
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {plan.macro_goals.map((goal) => (
                         <div
                           key={goal.id}
-                          className="bg-blue-50 rounded-lg p-3"
+                          className="bg-[var(--color-background)] rounded-xl p-3"
                         >
-                          <div className="text-xs text-gray-600 capitalize">
+                          <div className="text-xs text-[var(--color-subtext)] capitalize mb-1">
                             {goal.goal_type}
                           </div>
-                          <div className="text-lg font-bold text-blue-600">
+                          <div className="text-lg font-bold text-[var(--color-teal)]">
                             {goal.target_amount}
-                            <span className="text-sm ml-1">{goal.unit}</span>
+                            <span className="text-sm ml-1 text-[var(--color-subtext)] font-normal">
+                              {goal.unit}
+                            </span>
                           </div>
-                          {goal.notes && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              {goal.notes}
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -752,18 +776,24 @@ export default function ClientDetailPage() {
               ))}
 
             {profile.role === "trainer" && exercisePlans.length === 0 && (
-              <div className="bg-white rounded-lg shadow p-12 text-center">
-                <div className="text-6xl mb-4">🏋️</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-100">
+                <div className="w-20 h-20 bg-[var(--color-background)] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-4xl">🏋️</span>
+                </div>
+                <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
                   No Exercise Plans Yet
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-[var(--color-subtext)] mb-6 max-w-md mx-auto">
                   Create an exercise plan to guide your client&apos;s fitness
                   journey
                 </p>
                 <button
-                  onClick={() => setShowCreatePlanModal(true)}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                  onClick={() =>
+                    router.push(
+                      `/professionals/clients/${clientId}/exercise-plans/create`
+                    )
+                  }
+                  className="bg-[var(--color-teal)] text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
                 >
                   Create First Plan
                 </button>
@@ -774,15 +804,15 @@ export default function ClientDetailPage() {
               exercisePlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="bg-white rounded-lg shadow-md p-6"
+                  className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-bold text-[var(--color-foreground)]">
                         {plan.title}
                       </h3>
                       {plan.description && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-[var(--color-subtext)] mt-1">
                           {plan.description}
                         </p>
                       )}
@@ -790,95 +820,98 @@ export default function ClientDetailPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleExercisePlanActive(plan.id)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer hover:opacity-80 ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
                           plan.is_active
-                            ? "bg-green-100 text-green-800 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-600"
                         }`}
-                        title={
-                          plan.is_active
-                            ? "Click to deactivate"
-                            : "Click to activate"
-                        }
                       >
-                        {plan.is_active ? "✓ Active" : "Inactive"}
+                        {plan.is_active ? "Active" : "Inactive"}
                       </button>
                       <button
-                        onClick={() => setEditingExercisePlan(plan)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition"
-                        title="Edit plan"
+                        onClick={() =>
+                          router.push(
+                            `/professionals/clients/${clientId}/exercise-plans/${plan.id}/edit`
+                          )
+                        }
+                        className="p-2 text-[var(--color-teal)] hover:bg-[var(--color-background)] rounded-lg transition"
                       >
                         <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
                         </svg>
                       </button>
                       <button
                         onClick={() => handleDeleteExercisePlan(plan.id)}
                         disabled={deletingPlanId === plan.id}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition disabled:opacity-50"
-                        title="Delete plan"
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
                       >
-                        {deletingPlanId === plan.id ? (
-                          <span className="text-xs">...</span>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Start Date:</span>
-                      <span className="ml-2 font-medium">
+                  <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                    <div className="bg-[var(--color-background)] p-3 rounded-xl">
+                      <span className="text-[var(--color-subtext)] block text-xs mb-1">
+                        Start Date
+                      </span>
+                      <span className="font-medium text-[var(--color-foreground)]">
                         {new Date(plan.start_date).toLocaleDateString()}
                       </span>
                     </div>
                     {plan.end_date && (
-                      <div>
-                        <span className="text-gray-500">End Date:</span>
-                        <span className="ml-2 font-medium">
+                      <div className="bg-[var(--color-background)] p-3 rounded-xl">
+                        <span className="text-[var(--color-subtext)] block text-xs mb-1">
+                          End Date
+                        </span>
+                        <span className="font-medium text-[var(--color-foreground)]">
                           {new Date(plan.end_date).toLocaleDateString()}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="border-t pt-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                  <div className="border-t border-gray-100 pt-4">
+                    <h4 className="text-sm font-bold text-[var(--color-foreground)] mb-3">
                       Exercises ({plan.exercises.length})
                     </h4>
                     <div className="space-y-3">
                       {plan.exercises.map((exercise) => (
                         <div
                           key={exercise.id}
-                          className="bg-gray-50 rounded-lg p-4"
+                          className="bg-[var(--color-background)] rounded-xl p-4"
                         >
                           <div className="flex justify-between items-start mb-2">
-                            <h5 className="font-semibold text-gray-900">
+                            <h5 className="font-semibold text-[var(--color-foreground)]">
                               {exercise.name}
                             </h5>
                             <div className="flex gap-1">
                               {exercise.scheduled_days.map((day) => (
                                 <span
                                   key={day}
-                                  className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium"
+                                  className="px-2 py-1 bg-white text-[var(--color-teal)] rounded-lg text-xs font-medium shadow-sm"
                                 >
                                   {getDayName(day)}
                                 </span>
@@ -886,19 +919,23 @@ export default function ClientDetailPage() {
                             </div>
                           </div>
                           {exercise.description && (
-                            <p className="text-sm text-gray-600 mb-2">
+                            <p className="text-sm text-[var(--color-subtext)] mb-3">
                               {exercise.description}
                             </p>
                           )}
-                          <div className="flex gap-4 text-sm text-gray-600">
+                          <div className="flex gap-4 text-sm text-[var(--color-subtext)]">
                             {exercise.sets && (
-                              <span>Sets: {exercise.sets}</span>
+                              <span className="bg-white px-2 py-1 rounded-lg">
+                                Sets: {exercise.sets}
+                              </span>
                             )}
                             {exercise.reps && (
-                              <span>Reps: {exercise.reps}</span>
+                              <span className="bg-white px-2 py-1 rounded-lg">
+                                Reps: {exercise.reps}
+                              </span>
                             )}
                             {exercise.duration_minutes && (
-                              <span>
+                              <span className="bg-white px-2 py-1 rounded-lg">
                                 Duration: {exercise.duration_minutes}min
                               </span>
                             )}
@@ -915,7 +952,7 @@ export default function ClientDetailPage() {
         {/* Progress Tab */}
         {activeTab === "progress" && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-xl font-bold text-[var(--color-foreground)] mb-6">
               Client Progress
             </h2>
 
@@ -924,23 +961,25 @@ export default function ClientDetailPage() {
                 {/* Trainer Progress View - Exercise Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Completion Rate */}
-                  <div className="bg-white rounded-lg shadow p-6">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-[var(--color-subtext)]">
                         Workout Completion
                       </h3>
                       <span className="text-2xl">📊</span>
                     </div>
-                    <div className="text-3xl font-bold text-blue-600">
+                    <div className="text-3xl font-bold text-[var(--color-teal)]">
                       {getCompletionRate()}%
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
+                    <p className="text-xs text-[var(--color-subtext)] mt-1">
+                      Last 30 days
+                    </p>
                   </div>
 
                   {/* Total Completions */}
-                  <div className="bg-white rounded-lg shadow p-6">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-[var(--color-subtext)]">
                         Total Workouts
                       </h3>
                       <span className="text-2xl">✅</span>
@@ -948,13 +987,15 @@ export default function ClientDetailPage() {
                     <div className="text-3xl font-bold text-green-600">
                       {exerciseCompletions.length}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Completed</p>
+                    <p className="text-xs text-[var(--color-subtext)] mt-1">
+                      Completed
+                    </p>
                   </div>
 
                   {/* Exercises Assigned */}
-                  <div className="bg-white rounded-lg shadow p-6">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-[var(--color-subtext)]">
                         Exercises Assigned
                       </h3>
                       <span className="text-2xl">🏋️</span>
@@ -962,7 +1003,7 @@ export default function ClientDetailPage() {
                     <div className="text-3xl font-bold text-purple-600">
                       {getTotalExercisesAssigned()}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-[var(--color-subtext)] mt-1">
                       Active exercises
                     </p>
                   </div>
@@ -970,69 +1011,66 @@ export default function ClientDetailPage() {
 
                 {/* Weekly Activity Chart */}
                 {exerciseCompletions.length > 0 && (
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
+                    <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">
                       This Week&apos;s Activity
                     </h3>
                     <div className="grid grid-cols-7 gap-2">
                       {getWeeklyCompletionData().map((day) => (
                         <div key={day.date} className="text-center">
-                          <div className="text-xs text-gray-600 mb-2">
+                          <div className="text-xs text-[var(--color-subtext)] mb-2">
                             {day.dayName}
                           </div>
                           <div
-                            className={`h-20 rounded-lg flex items-end justify-center pb-2 text-white font-bold ${
+                            className={`h-20 rounded-xl flex items-end justify-center pb-2 text-white font-bold transition-all ${
                               day.count === 0
-                                ? "bg-gray-200 text-gray-400"
+                                ? "bg-gray-100 text-gray-400"
                                 : day.count <= 2
-                                ? "bg-blue-300"
+                                ? "bg-[var(--color-teal)] opacity-60"
                                 : day.count <= 4
-                                ? "bg-blue-500"
-                                : "bg-blue-700"
+                                ? "bg-[var(--color-teal)] opacity-80"
+                                : "bg-[var(--color-teal)]"
                             }`}
                           >
                             {day.count > 0 && day.count}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-[var(--color-subtext)] mt-1">
                             {new Date(day.date).getDate()}
                           </div>
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-4 text-center">
-                      Number of exercises completed per day
-                    </p>
                   </div>
                 )}
 
                 {/* Recent Exercise Completions */}
                 {exerciseCompletions.length > 0 ? (
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
+                    <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">
                       Recent Exercise Completions
                     </h3>
                     <div className="space-y-3">
                       {getRecentCompletions().map((completion) => (
                         <div
                           key={completion.id}
-                          className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg"
+                          className="flex items-start space-x-3 p-4 bg-[var(--color-background)] rounded-xl"
                         >
                           <div className="shrink-0">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
                               <span className="text-green-600 text-lg">✓</span>
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-bold text-[var(--color-foreground)]">
                               {completion.exercises?.name || "Exercise"}
                             </p>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-[var(--color-subtext)]">
                               {new Date(
                                 completion.completion_date
                               ).toLocaleDateString()}
                             </div>
                             {completion.notes && (
-                              <p className="text-xs text-gray-600 mt-1">
+                              <p className="text-xs text-[var(--color-subtext)] mt-1 bg-white p-2 rounded-lg inline-block">
                                 Note: {completion.notes}
                               </p>
                             )}
@@ -1042,12 +1080,14 @@ export default function ClientDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-lg shadow p-12 text-center">
-                    <div className="text-6xl mb-4">📊</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <div className="bg-white rounded-3xl shadow-sm p-12 text-center border border-gray-100">
+                    <div className="w-20 h-20 bg-[var(--color-background)] rounded-full flex items-center justify-center mx-auto mb-6">
+                      <span className="text-4xl">📊</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
                       No Progress Data Yet
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-[var(--color-subtext)]">
                       Exercise completions will appear here once your client
                       starts tracking their workouts
                     </p>
@@ -1060,8 +1100,8 @@ export default function ClientDetailPage() {
                 {getActiveMacroGoals().length > 0 ? (
                   <>
                     {/* Macro Goals Adherence */}
-                    <div className="bg-white rounded-lg shadow p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
+                      <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">
                         Macro Goals Adherence (Last 30 Days)
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1076,33 +1116,27 @@ export default function ClientDetailPage() {
                           return (
                             <div
                               key={goal.id}
-                              className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg p-4"
+                              className="bg-[var(--color-background)] rounded-xl p-4"
                             >
-                              <div className="text-xs text-gray-600 capitalize mb-1">
+                              <div className="text-xs text-[var(--color-subtext)] capitalize mb-1">
                                 {goal.goal_type}
                               </div>
-                              <div className="text-2xl font-bold text-blue-600 mb-2">
+                              <div className="text-2xl font-bold text-[var(--color-teal)] mb-2">
                                 {avgValue}
-                                <span className="text-sm ml-1">
+                                <span className="text-sm ml-1 text-[var(--color-subtext)] font-normal">
                                   {goal.unit}
                                 </span>
                               </div>
-                              <div className="text-xs text-gray-500 mb-2">
+                              <div className="text-xs text-[var(--color-subtext)] mb-2">
                                 Target: {goal.target_amount} {goal.unit}
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="w-full bg-white rounded-full h-2 overflow-hidden">
                                 <div
-                                  className={`h-2 rounded-full ${
-                                    adherence >= 90
-                                      ? "bg-green-500"
-                                      : adherence >= 70
-                                      ? "bg-yellow-500"
-                                      : "bg-red-500"
-                                  }`}
+                                  className="bg-[var(--color-teal)] h-2 rounded-full"
                                   style={{ width: `${adherence}%` }}
                                 ></div>
                               </div>
-                              <div className="text-xs text-gray-600 mt-1 text-right">
+                              <div className="text-xs text-[var(--color-subtext)] mt-1 text-right">
                                 {adherence}% adherence
                               </div>
                             </div>
@@ -1112,8 +1146,8 @@ export default function ClientDetailPage() {
                     </div>
 
                     {/* Weekly Nutrition Trends */}
-                    <div className="bg-white rounded-lg shadow p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100 mt-6">
+                      <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">
                         This Week&apos;s Nutrition Tracking
                       </h3>
                       <div className="space-y-6">
@@ -1129,40 +1163,36 @@ export default function ClientDetailPage() {
                             );
                             return (
                               <div key={goal.id}>
-                                <div className="text-sm font-medium text-gray-700 mb-2 capitalize">
+                                <div className="text-sm font-medium text-[var(--color-foreground)] mb-2 capitalize">
                                   {goal.goal_type} (Target: {goal.target_amount}{" "}
                                   {goal.unit})
                                 </div>
-                                <div className="grid grid-cols-7 gap-2">
-                                  {weekData.map((day) => (
-                                    <div key={day.date} className="text-center">
-                                      <div className="text-xs text-gray-600 mb-2">
-                                        {day.dayName}
-                                      </div>
+                                <div className="grid grid-cols-7 gap-2 h-24 items-end">
+                                  {weekData.map((day) => {
+                                    const heightPercent =
+                                      maxValue > 0
+                                        ? (day.value / maxValue) * 100
+                                        : 0;
+                                    return (
                                       <div
-                                        className={`h-20 rounded-lg flex items-end justify-center pb-1 text-xs font-bold ${
-                                          day.value === 0
-                                            ? "bg-gray-200 text-gray-400"
-                                            : day.value >= goal.target_amount
-                                            ? "bg-green-500 text-white"
-                                            : day.value >=
-                                              goal.target_amount * 0.7
-                                            ? "bg-yellow-400 text-gray-800"
-                                            : "bg-red-400 text-white"
-                                        }`}
-                                        style={{
-                                          height: `${
-                                            80 * (day.value / maxValue) + 40
-                                          }px`,
-                                        }}
+                                        key={day.date}
+                                        className="flex flex-col items-center justify-end h-full"
                                       >
-                                        {day.value > 0 && day.value}
+                                        <div
+                                          className="w-full bg-[var(--color-teal)] rounded-t-lg opacity-80 hover:opacity-100 transition-opacity"
+                                          style={{
+                                            height: `${Math.max(
+                                              heightPercent,
+                                              5
+                                            )}%`,
+                                          }}
+                                        ></div>
+                                        <div className="text-xs text-[var(--color-subtext)] mt-1">
+                                          {day.dayName}
+                                        </div>
                                       </div>
-                                      <div className="text-xs text-gray-500 mt-1">
-                                        {new Date(day.date).getDate()}
-                                      </div>
-                                    </div>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               </div>
                             );
@@ -1171,12 +1201,14 @@ export default function ClientDetailPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="bg-white rounded-lg shadow p-12 text-center">
-                    <div className="text-6xl mb-4">📊</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <div className="bg-white rounded-3xl shadow-sm p-12 text-center border border-gray-100">
+                    <div className="w-20 h-20 bg-[var(--color-background)] rounded-full flex items-center justify-center mx-auto mb-6">
+                      <span className="text-4xl">📊</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
                       No Active Nutrition Plan
                     </h3>
-                    <p className="text-gray-600 mb-6">
+                    <p className="text-[var(--color-subtext)] mb-6">
                       Create a nutrition plan to start tracking your
                       client&apos;s progress
                     </p>
@@ -1185,7 +1217,7 @@ export default function ClientDetailPage() {
                         setActiveTab("plans");
                         setShowCreatePlanModal(true);
                       }}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                      className="bg-[var(--color-teal)] text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
                     >
                       Create Nutrition Plan
                     </button>
@@ -1193,44 +1225,50 @@ export default function ClientDetailPage() {
                 )}
 
                 {/* Nutrition Data Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-lg shadow p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-[var(--color-subtext)]">
                         Data Points Logged
                       </h3>
                       <span className="text-2xl">📝</span>
                     </div>
-                    <div className="text-3xl font-bold text-blue-600">
+                    <div className="text-3xl font-bold text-[var(--color-teal)]">
                       {getNutritionDataCount()}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
+                    <p className="text-xs text-[var(--color-subtext)] mt-1">
+                      Last 30 days
+                    </p>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-6">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-[var(--color-subtext)]">
                         Avg Daily Calories
                       </h3>
                       <span className="text-2xl">🔥</span>
                     </div>
-                    <div className="text-3xl font-bold text-orange-600">
+                    <div className="text-3xl font-bold text-[var(--color-orange)]">
                       {getAverageNutritionValue("calories")}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">kcal</p>
+                    <p className="text-xs text-[var(--color-subtext)] mt-1">
+                      kcal
+                    </p>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-6">
+                  <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-[var(--color-subtext)]">
                         Avg Daily Protein
                       </h3>
                       <span className="text-2xl">🥩</span>
                     </div>
-                    <div className="text-3xl font-bold text-red-600">
+                    <div className="text-3xl font-bold text-red-500">
                       {getAverageNutritionValue("protein")}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">grams</p>
+                    <p className="text-xs text-[var(--color-subtext)] mt-1">
+                      grams
+                    </p>
                   </div>
                 </div>
               </>
@@ -1241,16 +1279,18 @@ export default function ClientDetailPage() {
         {/* Health Data Tab */}
         {activeTab === "health" && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-xl font-bold text-[var(--color-foreground)] mb-6">
               HealthKit Data (Last 30 Days)
             </h2>
             {healthKitData.length === 0 ? (
-              <div className="bg-white rounded-lg shadow p-12 text-center">
-                <div className="text-6xl mb-4">💚</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div className="bg-white rounded-3xl shadow-sm p-12 text-center border border-gray-100">
+                <div className="w-20 h-20 bg-[var(--color-background)] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-4xl">💚</span>
+                </div>
+                <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
                   No Health Data Yet
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-[var(--color-subtext)]">
                   Health data will appear here once the client syncs their
                   HealthKit data
                 </p>
@@ -1285,9 +1325,9 @@ export default function ClientDetailPage() {
                   return (
                     <div
                       key={category}
-                      className="bg-white rounded-lg shadow p-6"
+                      className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100"
                     >
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4 capitalize">
+                      <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4 capitalize">
                         {category === "nutrition"
                           ? "🥗 Nutrition"
                           : "🏃 Fitness"}
@@ -1296,16 +1336,16 @@ export default function ClientDetailPage() {
                         {categoryData.slice(0, 5).map((dataPoint) => (
                           <div
                             key={dataPoint.id}
-                            className="flex justify-between items-center text-sm"
+                            className="flex justify-between items-center text-sm p-3 bg-[var(--color-background)] rounded-xl"
                           >
-                            <span className="text-gray-600 capitalize">
+                            <span className="text-[var(--color-foreground)] capitalize font-medium">
                               {dataPoint.data_type.replace("_", " ")}
                             </span>
                             <div className="text-right">
-                              <div className="font-semibold text-gray-900">
+                              <div className="font-bold text-[var(--color-teal)]">
                                 {dataPoint.value} {dataPoint.unit}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-[var(--color-subtext)]">
                                 {new Date(
                                   dataPoint.recorded_at
                                 ).toLocaleDateString()}
@@ -1321,7 +1361,7 @@ export default function ClientDetailPage() {
             )}
           </div>
         )}
-      </main>
+      </div>
 
       {/* Create/Edit Plan Modal */}
       {(showCreatePlanModal || editingNutritionPlan || editingExercisePlan) &&
@@ -1340,22 +1380,6 @@ export default function ClientDetailPage() {
                   onCancel={() => {
                     setShowCreatePlanModal(false);
                     setEditingNutritionPlan(null);
-                  }}
-                />
-              )}
-            {profile.role === "trainer" &&
-              (showCreatePlanModal || editingExercisePlan) && (
-                <ExercisePlanForm
-                  clientId={clientId}
-                  existingPlan={editingExercisePlan}
-                  onSuccess={() => {
-                    setShowCreatePlanModal(false);
-                    setEditingExercisePlan(null);
-                    fetchExercisePlans();
-                  }}
-                  onCancel={() => {
-                    setShowCreatePlanModal(false);
-                    setEditingExercisePlan(null);
                   }}
                 />
               )}
