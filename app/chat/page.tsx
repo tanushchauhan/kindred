@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createBrowserClient } from "@supabase/ssr";
@@ -18,7 +18,7 @@ interface UserProfile {
   full_name: string;
 }
 
-export default function ChatPage() {
+function ChatContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialConversationId = searchParams?.get("conversationId");
@@ -551,5 +551,19 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-teal)]"></div>
+        </div>
+      }
+    >
+      <ChatContent />
+    </Suspense>
   );
 }
