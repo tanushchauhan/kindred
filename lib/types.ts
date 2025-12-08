@@ -15,6 +15,7 @@ export interface User {
   gender: string | null;
   location: string | null;
   birth_date: string | null;
+  profile_image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -345,4 +346,52 @@ export interface MarkExerciseCompleteRequest {
   completion_date: string;
   completed: boolean;
   notes?: string;
+}
+
+// Chat Types
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+  sender?: {
+    id: string;
+    full_name: string | null;
+    user_name: string | null;
+    role: UserRole;
+    profile_image_url?: string | null;
+  };
+}
+
+export interface ChatParticipant {
+  conversation_id: string;
+  user_id: string;
+  joined_at: string;
+  user?: {
+    id: string;
+    full_name: string | null;
+    user_name: string | null;
+    role: UserRole;
+    profile_image_url?: string | null;
+  };
+}
+
+export interface Conversation {
+  id: string;
+  is_group: boolean;
+  group_name: string | null;
+  created_at: string;
+  updated_at: string;
+  participants?: {
+    user: {
+      id: string;
+      full_name: string | null;
+      user_name: string | null;
+      role: UserRole;
+      profile_image_url?: string | null;
+    };
+  }[];
+  messages?: { content: string; created_at: string; is_read: boolean }[];
 }

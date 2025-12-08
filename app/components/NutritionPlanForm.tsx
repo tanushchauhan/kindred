@@ -184,7 +184,7 @@ export default function NutritionPlanForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-3xl w-full my-8">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">

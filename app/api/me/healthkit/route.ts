@@ -79,27 +79,48 @@ export async function POST(request: NextRequest) {
       metadata: entry.metadata || null,
     }));
 
-    // Insert data (using upsert to avoid duplicates if needed)
-    const { data: insertedData, error: insertError } = await supabase
-      .from("healthkit_data")
-      .insert(healthKitDataToInsert)
-      .select();
+    // Insert data (handling duplicates by deleting existing records for the same day/type)
+    const insertedResults = [];
 
-    if (insertError) {
-      console.error("Error syncing HealthKit data:", insertError);
-      return NextResponse.json(
-        { error: "Failed to sync HealthKit data" },
-        { status: 500 }
-      );
+    for (const entry of healthKitDataToInsert) {
+      // 1. Delete existing record for this type and timestamp
+      const { error: deleteError } = await supabase
+        .from("healthkit_data")
+        .delete()
+        .match({
+          client_id: user.id,
+          data_type: entry.data_type,
+          recorded_at: entry.recorded_at,
+        });
+
+      if (deleteError) {
+        console.error(
+          `Error deleting existing ${entry.data_type} data:`,
+          deleteError
+        );
+        // Continue anyway to try insert
+      }
+
+      // 2. Insert new record
+      const { data, error: insertError } = await supabase
+        .from("healthkit_data")
+        .insert(entry)
+        .select();
+
+      if (insertError) {
+        console.error(`Error inserting ${entry.data_type} data:`, insertError);
+      } else if (data) {
+        insertedResults.push(data[0]);
+      }
     }
 
     return NextResponse.json(
       {
         message: "HealthKit data synced successfully",
-        synced_count: insertedData?.length || 0,
-        data: insertedData,
+        synced_count: insertedResults.length,
+        data: insertedResults,
       },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Error in POST /api/me/healthkit:", error);
