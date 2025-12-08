@@ -1,7 +1,7 @@
 # Kindred Web Platform & API
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tanushchauhan/ConvergentF25-2/refs/heads/main/assets/images/icon.png?token=GHSAT0AAAAAADP4ZEMMEIPEXAB3LLJ7T3OS2JWHVWA" alt="Kindred Logo" width="120" height="120" />
+  <img src="https://raw.githubusercontent.com/tanushchauhan/kindred-mobile-app/refs/heads/main/assets/images/icon.png" alt="Kindred Logo" width="120" height="120" />
   <br />
   <h3>The Brain & Command Center of the Kindred Ecosystem.</h3>
 </div>
