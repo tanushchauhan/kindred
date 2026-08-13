@@ -160,11 +160,13 @@ function ChatContent() {
       if (convError) throw convError;
 
       // Transform data to match Conversation type
-      const formattedConversations = (convData as any[]).map((conv) => ({
+      const formattedConversations: Conversation[] = (
+        convData as Conversation[]
+      ).map((conv) => ({
         ...conv,
         // Sort messages to get the last one
-        messages: conv.messages.sort(
-          (a: any, b: any) =>
+        messages: (conv.messages ?? []).sort(
+          (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         ),
       }));
@@ -176,7 +178,7 @@ function ChatContent() {
       formattedConversations.forEach((conv) => {
         // Find the other participant
         const otherParticipant = conv.participants?.find(
-          (p: any) => p.user.id !== userId
+          (p) => p.user.id !== userId
         )?.user;
 
         if (!otherParticipant) return;

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
-import { Conversation, ChatMessage, UserRole } from "@/lib/types";
+import { Conversation, ChatMessage } from "@/lib/types";
 
 // Initialize Supabase client
 const supabase = createBrowserClient(
@@ -143,11 +143,13 @@ export default function ChatPage() {
       if (convError) throw convError;
 
       // Transform data to match Conversation type
-      const formattedConversations = (convData as any[]).map((conv) => ({
+      const formattedConversations: Conversation[] = (
+        convData as Conversation[]
+      ).map((conv) => ({
         ...conv,
         // Sort messages to get the last one
-        messages: conv.messages.sort(
-          (a: any, b: any) =>
+        messages: (conv.messages ?? []).sort(
+          (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         ),
       }));

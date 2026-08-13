@@ -17,14 +17,8 @@ interface ClientMatch {
   last_updated: string;
 }
 
-interface UserProfile {
-  role: string;
-  full_name: string;
-}
-
 export default function ProfessionalClientsPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [clients, setClients] = useState<ClientMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -56,7 +50,6 @@ export default function ProfessionalClientsPage() {
         return;
       }
 
-      setProfile(data);
       await fetchClients();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

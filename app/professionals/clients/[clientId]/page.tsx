@@ -93,8 +93,6 @@ export default function ClientDetailPage() {
   const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
   const [editingNutritionPlan, setEditingNutritionPlan] =
     useState<NutritionPlan | null>(null);
-  const [editingExercisePlan, setEditingExercisePlan] =
-    useState<ExercisePlan | null>(null);
 
   useEffect(() => {
     if (clientId) {
@@ -1364,7 +1362,7 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Create/Edit Plan Modal */}
-      {(showCreatePlanModal || editingNutritionPlan || editingExercisePlan) &&
+      {(showCreatePlanModal || editingNutritionPlan) &&
         profile && (
           <>
             {profile.role === "nutritionist" &&

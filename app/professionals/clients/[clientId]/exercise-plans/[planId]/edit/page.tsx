@@ -14,6 +14,16 @@ interface ExerciseInput {
   notes: string;
 }
 
+interface ExerciseRecord {
+  name: string;
+  description: string | null;
+  sets: number | null;
+  reps: number | null;
+  duration_minutes: number | null;
+  scheduled_days: number[];
+  notes: string | null;
+}
+
 const DAY_OPTIONS = [
   { value: 0, label: "Sun" },
   { value: 1, label: "Mon" },
@@ -67,7 +77,7 @@ export default function EditExercisePlanPage() {
       setStartDate(plan.start_date.split("T")[0]);
       setEndDate(plan.end_date ? plan.end_date.split("T")[0] : "");
       setExercises(
-        plan.exercises.map((ex: any) => ({
+        plan.exercises.map((ex: ExerciseRecord) => ({
           name: ex.name,
           description: ex.description || "",
           sets: ex.sets?.toString() || "",

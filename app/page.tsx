@@ -7,11 +7,29 @@ export default function Home() {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Kindred</h1>
           <p className="text-xl text-gray-600">
-            A place to find your wellness family
+            AI-assisted wellness matching, shared plans, health insights, and chat
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <Link
+          href="/demo"
+          className="mb-6 flex items-center justify-between rounded-2xl bg-[#183d35] p-6 text-white shadow-xl transition hover:-translate-y-1 hover:bg-[#214d43]"
+        >
+          <div className="text-left">
+            <div className="text-sm font-semibold uppercase tracking-wider text-[#9fd8ca]">
+              No account required
+            </div>
+            <h2 className="mt-1 text-2xl font-bold">View interactive demo</h2>
+            <p className="mt-1 text-sm text-white/70">
+              Explore the professional workspace with bundled sample data
+            </p>
+          </div>
+          <span className="ml-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#9fd8ca] text-xl text-[#183d35]">
+            ▶
+          </span>
+        </Link>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Link
             href="/auth/signin"
             className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition transform hover:-translate-y-1"

@@ -2,34 +2,25 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Middleware to handle CORS for mobile app requests
- * Allows cross-origin requests from React Native mobile app
+ * Apply CORS headers to API requests from the companion mobile application.
  */
-export function middleware(request: NextRequest) {
-  // Get the origin from the request
+export function proxy(request: NextRequest) {
   const origin = request.headers.get("origin");
-
-  // List of allowed origins (add your mobile app origins here)
   const allowedOrigins = [
-    "http://localhost:8081", // React Native dev server
-    "http://localhost:19006", // Expo web
-    "http://192.168.1.1:8081", // Add your computer's IP if needed
-    "*", // Fallback for development
+    "http://localhost:8081",
+    "http://localhost:19006",
+    "http://192.168.1.1:8081",
   ];
 
-  // Determine which origin to allow
   let allowOrigin = "*";
   if (origin && allowedOrigins.includes(origin)) {
     allowOrigin = origin;
-  } else if (origin && origin.startsWith("http://192.168.")) {
-    // Allow any local network IP for development
+  } else if (origin?.startsWith("http://192.168.")) {
     allowOrigin = origin;
-  } else if (origin && origin.startsWith("http://10.0.")) {
-    // Allow iOS simulator network
+  } else if (origin?.startsWith("http://10.0.")) {
     allowOrigin = origin;
   }
 
-  // Handle preflight OPTIONS requests
   if (request.method === "OPTIONS") {
     return new NextResponse(null, {
       status: 200,
@@ -45,7 +36,6 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Add CORS headers to all API responses
   const response = NextResponse.next();
   response.headers.set("Access-Control-Allow-Origin", allowOrigin);
   response.headers.set(
@@ -61,7 +51,6 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
-// Apply middleware only to API routes
 export const config = {
   matcher: "/api/:path*",
 };

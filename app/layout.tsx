@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Kindred",
-  description: "A place to find your wellness family",
+  description:
+    "AI-assisted wellness matching, shared health insights, personalized plans, and chat.",
 };
 
 export default function RootLayout({
